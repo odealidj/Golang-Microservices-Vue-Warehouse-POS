@@ -15,6 +15,7 @@ Dokumen ini menjelaskan strategi pengujian berlapis serta arsitektur **Observabi
 | `feat/metrics-prometheus` | Metrics Prometheus + Grafana opsional | `backend/pkg/observability/metrics.go`, `backend/observability/{prometheus.yml,grafana-datasources.yml}` |
 | `feat/distributed-tracing` | Distributed tracing OpenTelemetry + Jaeger | `backend/pkg/observability/tracing.go`, propagasi `c.UserContext()` & `NewTracedHTTPClient` |
 | `feat/load-testing` | Load testing skenario API dengan k6 | `backend/tests/load/smoke_and_pos.js`, target `make load-test` |
+| `feat/go-quality-and-testing` | Quality gate Go (`golangci-lint`, `govulncheck`, `-race`) & GoMock | `.golangci.yml`, `.github/workflows/ci.yml`, `Makefile`, `backend/*/mocks/` |
 
 ---
 
@@ -22,7 +23,8 @@ Dokumen ini menjelaskan strategi pengujian berlapis serta arsitektur **Observabi
 
 | Lapisan Test | Perintah | Dependensi Eksternal | Cakupan Utama |
 |---|---|---|---|
-| **Go Unit Test & Vet** | `make test-backend` / `make vet-backend` | Tidak ada (menggunakan mock/in-memory) | Auth/RBAC middleware, server-side pricing + PPN 11%, sanitasi payload event, pagination, lookup barcode, & `pkg/observability` |
+| **Go Unit Test (`-race`) & GoMock** | `make test-backend` / `make generate-mocks` | Tidak ada (`go.uber.org/mock/gomock`) | Auth/RBAC middleware, server-side pricing + PPN 11%, sanitasi payload event, pagination, lookup barcode (seluruh test usecase memakai mock `mockgen` + detector `-race`) |
+| **Static Check, Lint & Security** | `make vet-backend`, `make lint-backend`, `make vulncheck-backend` | Tidak ada (`golangci-lint`), vuln DB (`govulncheck`) | `go vet`, `golangci-lint` (`.golangci.yml`: `errcheck`, `bodyclose`, `govet`, `ineffassign`, `staticcheck`, `unused`, `misspell`), serta pemindaian CVE dependensi dengan `govulncheck` |
 | **Frontend Unit Test & Build** | `make test-frontend` / `make build-frontend` | Node.js `20+` | Pinia store transaksi (`node --test`) dan validasi bundle produksi Vite |
 | **API Gateway Integration Test** | `make test-integration-gateway` | Tidak ada (`httptest.Server`) | `GET /health`, verifikasi JWT, sanitasi header internal (`X-User-*`, `X-Gateway`, `X-Internal-Request`), forwarding webhook Midtrans, serta `/metrics` atau `Traceparent`/`X-Trace-ID` (sesuai branch) |
 | **E2E Multi-Service Integration** | `make test-integration` | Docker stack (`make up`) | Alur Auth → Produk & Gudang → Distribusi ke Merchant (RabbitMQ) → Webhook Midtrans |
@@ -102,3 +104,16 @@ make up        # Pastikan stack Docker aktif
 make load-test # Menjalankan: k6 run backend/tests/load/smoke_and_pos.js
 ```
 Variabel lingkungan opsional yang didukung skrip k6: `API_GATEWAY_URL` (default `http://localhost:8080`), `K6_EMAIL` (default `manager@mail.com`), dan `K6_PASSWORD` (default `manager123`).
+
+---
+
+## 5.6 Integrasi GitHub Actions CI (`feat/go-quality-and-testing`)
+
+Workflow [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) menjalankan pengecekan otomatis pada `push` (`main`, `master`, `feat/**`), `pull_request` (`main`, `master`), serta `workflow_dispatch`:
+
+| Job | Target | Pengecekan yang Dijalankan |
+|---|---|---|
+| `backend` | Matrix 7 microservices Go (`1.26.x`) | `go test -race -v ./...`, `go test -tags=integration -race -v ./...` (`api-gateway`), `go vet ./...`, `golangci-lint` (`v1.64.8`), dan `govulncheck ./...` |
+| `gomock` | 5 service dengan interface mock | `go install go.uber.org/mock/mockgen@v0.6.0` & `make verify-mocks` (`git diff --exit-code -- 'backend/*/mocks'`) |
+| `compose` | `backend/docker-compose.yml` | `make setup-env` & `docker compose config -q` |
+| `frontend` | `frontend/` (Node `22`) | `npm ci`, `npm test`, dan `npm run build` |
