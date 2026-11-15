@@ -104,3 +104,16 @@ make up        # Pastikan stack Docker aktif
 make load-test # Menjalankan: k6 run backend/tests/load/smoke_and_pos.js
 ```
 Variabel lingkungan opsional yang didukung skrip k6: `API_GATEWAY_URL` (default `http://localhost:8080`), `K6_EMAIL` (default `manager@mail.com`), dan `K6_PASSWORD` (default `manager123`).
+
+---
+
+## 5.6 Integrasi GitHub Actions CI (`feat/go-quality-and-testing`)
+
+Workflow [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) menjalankan pengecekan otomatis pada `push` (`main`, `master`, `feat/**`), `pull_request` (`main`, `master`), serta `workflow_dispatch`:
+
+| Job | Target | Pengecekan yang Dijalankan |
+|---|---|---|
+| `backend` | Matrix 7 microservices Go (`1.26.x`) | `go test -race -v ./...`, `go test -tags=integration -race -v ./...` (`api-gateway`), `go vet ./...`, `golangci-lint` (`v1.64.8`), dan `govulncheck ./...` |
+| `gomock` | 5 service dengan interface mock | `go install go.uber.org/mock/mockgen@v0.6.0` & `make verify-mocks` (`git diff --exit-code -- 'backend/*/mocks'`) |
+| `compose` | `backend/docker-compose.yml` | `make setup-env` & `docker compose config -q` |
+| `frontend` | `frontend/` (Node `22`) | `npm ci`, `npm test`, dan `npm run build` |

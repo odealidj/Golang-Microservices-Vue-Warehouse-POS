@@ -181,10 +181,18 @@ make vet-backend
 make lint-backend
 make vulncheck-backend
 make generate-mocks
+make verify-mocks
 make test-integration-gateway
 make test-frontend
 make build-frontend
 ```
+
+### GitHub Actions CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml))
+Pipeline otomatis berjalan pada `push` (`main`, `master`, `feat/**`), `pull_request` (`main`, `master`), dan `workflow_dispatch`, mencakup 4 job utama:
+- **Backend Matrix (7 services)**: `go test -race -v ./...`, `go test -tags=integration -race -v ./...` (`api-gateway`), `go vet ./...`, `golangci-lint` (`.golangci.yml`), dan `govulncheck ./...`.
+- **GoMock Sync Check**: menjalankan `make verify-mocks` untuk memastikan file di `backend/*/mocks/` sinkron dengan interface.
+- **Docker Compose Config Check**: menjalankan `make setup-env` dan `docker compose config -q`.
+- **Vue 3 Frontend**: `npm ci`, `npm test`, dan `npm run build`.
 ### Integration Test
 
 Integration test dipisahkan menggunakan build tag `//go:build integration` agar `make test-backend` tetap cepat tanpa dependensi eksternal:
