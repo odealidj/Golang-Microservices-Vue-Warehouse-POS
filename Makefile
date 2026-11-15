@@ -1,4 +1,4 @@
-.PHONY: help setup-env build up down logs ps test-backend vet-backend lint-backend vulncheck-backend generate-mocks verify-mocks test-integration-gateway test-integration test-frontend build-frontend dev-frontend test
+.PHONY: help setup-env build up down logs ps test-backend vet-backend lint-backend vulncheck-backend generate-mocks verify-mocks test-integration-gateway test-integration load-test test-frontend build-frontend dev-frontend test
 
 SERVICES := api-gateway merchant-service notification-service product-service transaction-service user-service warehouse-service
 MOCK_SERVICES := notification-service product-service transaction-service user-service warehouse-service
@@ -20,6 +20,7 @@ help:
 	@echo "  make verify-mocks       Ensure generated GoMock files match repository interfaces"
 	@echo "  make test-integration-gateway  Run API Gateway HTTP integration tests with -race (no Docker needed)"
 	@echo "  make test-integration          Run E2E integration tests against running Docker stack"
+	@echo "  make load-test                 Run k6 load test against API Gateway"
 	@echo "  make dev-frontend       Run Vue 3 Vite dev server"
 	@echo "  make build-frontend     Build Vue 3 production bundle"
 	@echo "  make test               Run backend tests (-race), vet, golangci-lint, frontend tests & build"
@@ -91,6 +92,9 @@ test-integration-gateway:
 
 test-integration:
 	cd backend/tests/integration && go test -tags=integration -v ./...
+
+load-test:
+	k6 run backend/tests/load/smoke_and_pos.js
 
 test-frontend:
 	cd frontend && npm test
