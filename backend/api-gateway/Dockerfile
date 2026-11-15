@@ -6,7 +6,7 @@ COPY pkg/observability ./pkg/observability
 COPY api-gateway/go.mod api-gateway/go.sum ./api-gateway/
 
 WORKDIR /app/api-gateway
-RUN go mod download && go mod verify
+RUN go mod download
 
 WORKDIR /app
 COPY api-gateway ./api-gateway

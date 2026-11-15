@@ -318,15 +318,32 @@ export const getMerchantProductByID = (productId, data, options = {}) => apiServ
 export const getKeepers = (query = '', options = {}) => apiService.get(`/api/v1/users/role/Keeper${query}`, options)
 export const getKeeperById = (id, options = {}) => apiService.get(`/api/v1/users/${id}`, options)
 
+const getStoredUserId = () => {
+  try {
+    const raw = localStorage.getItem('user_data') || localStorage.getItem('user')
+    return raw ? JSON.parse(raw)?.id : null
+  } catch {
+    return null
+  }
+}
+
 // Dashboard API methods
-export const getDashboardData = (options = {}) => apiService.get('/api/v1/dashboard/manager', options)
-export const getKeeperDashboardData = (merchantId, options = {}) => apiService.get(`/api/v1/dashboard/keeper/merchant/${merchantId}`, options)
+export const getDashboardData = (options = {}) => {
+  const userId = getStoredUserId()
+  const qs = userId ? `?user_id=${userId}` : ''
+  return apiService.get(`/api/v1/dashboard/manager${qs}`, options)
+}
+export const getKeeperDashboardData = (merchantId, options = {}) => {
+  const userId = getStoredUserId()
+  const qs = userId ? `?user_id=${userId}` : ''
+  return apiService.get(`/api/v1/dashboard/keeper/merchant/${merchantId}${qs}`, options)
+}
 
 // User Profile API methods
 export const updateProfile = (data, options = {}) => apiService.put('/api/v1/profile', data, options)
 
 // Transactions API methods
-export const getTransactions = (query = '', options = {}) => apiService.get(`/api/v1/transactions/with-products${query}`, options)
+export const getTransactions = (query = '', options = {}) => apiService.get(`/api/v1/transactions${query}`, options)
 export const getTransactionById = (id, options = {}) => apiService.get(`/api/v1/transactions/${id}`, options)
 export const createTransaction = (data, options = {}) => apiService.post('/api/v1/transactions', data, options)
 export const updateTransaction = (id, data, options = {}) => apiService.put(`/api/v1/transactions/${id}`, data, options)

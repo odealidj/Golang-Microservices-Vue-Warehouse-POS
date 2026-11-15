@@ -235,5 +235,9 @@ type ProductListResponse struct {
 }
 
 func NewProductClient(cfg configs.Config) ProductClientInterface {
-	return &ProductClient{httpClient: observability.NewTracedHTTPClient(30 * time.Second), UrlApiGateway: cfg.App.UrlApiGateway}
+	return &ProductClient{
+		httpClient:    observability.NewTracedHTTPClient(30 * time.Second),
+		UrlApiGateway: cfg.App.UrlApiGateway,
+		config:        cfg,
+	}
 }

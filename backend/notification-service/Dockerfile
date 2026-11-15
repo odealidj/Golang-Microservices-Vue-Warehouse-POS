@@ -6,7 +6,7 @@ COPY pkg/observability ./pkg/observability
 COPY notification-service/go.mod notification-service/go.sum ./notification-service/
 
 WORKDIR /app/notification-service
-RUN go mod download && go mod verify
+RUN go mod download
 
 WORKDIR /app
 COPY notification-service ./notification-service

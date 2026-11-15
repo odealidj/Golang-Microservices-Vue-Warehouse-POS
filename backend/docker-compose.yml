@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   user_db:
-    image: postgres:latest
+    image: postgres:17
     container_name: postgres-user
     environment:
       POSTGRES_USER: postgres
@@ -20,7 +20,7 @@ services:
       retries: 5
 
   product_db:
-    image: postgres:latest
+    image: postgres:17
     container_name: postgres-product
     environment:
       POSTGRES_USER: postgres
@@ -38,7 +38,7 @@ services:
       retries: 5
 
   transaction_db:
-    image: postgres:latest
+    image: postgres:17
     container_name: postgres-transaction
     environment:
       POSTGRES_USER: postgres
@@ -56,7 +56,7 @@ services:
       retries: 5
     
   merchant_db:
-    image: postgres:latest
+    image: postgres:17
     container_name: postgres-merchant
     environment:
       POSTGRES_USER: postgres
@@ -74,7 +74,7 @@ services:
       retries: 5
 
   notification_db:
-    image: postgres:latest
+    image: postgres:17
     container_name: postgres-notification
     environment:
       POSTGRES_USER: postgres
@@ -92,7 +92,7 @@ services:
       retries: 5
 
   warehouse_db:
-    image: postgres:latest
+    image: postgres:17
     container_name: postgres-warehouse
     environment:
       POSTGRES_USER: postgres

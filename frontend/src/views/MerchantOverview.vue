@@ -321,7 +321,7 @@ const loadLatestTransactions = async () => {
     }
     
     const response = await getTransactions(query)
-    transactions.value = response.transactions || []
+    transactions.value = response.data?.transactions || response.transactions || []
     
     console.log('Latest transactions loaded:', transactions.value)
     

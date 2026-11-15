@@ -6,7 +6,7 @@ COPY pkg/observability ./pkg/observability
 COPY product-service/go.mod product-service/go.sum ./product-service/
 
 WORKDIR /app/product-service
-RUN go mod download && go mod verify
+RUN go mod download
 
 WORKDIR /app
 COPY product-service ./product-service

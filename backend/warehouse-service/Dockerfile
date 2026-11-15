@@ -6,7 +6,7 @@ COPY pkg/observability ./pkg/observability
 COPY warehouse-service/go.mod warehouse-service/go.sum ./warehouse-service/
 
 WORKDIR /app/warehouse-service
-RUN go mod download && go mod verify
+RUN go mod download
 
 WORKDIR /app
 COPY warehouse-service ./warehouse-service

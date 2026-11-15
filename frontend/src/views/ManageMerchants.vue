@@ -179,9 +179,10 @@
         try {
           const response = await getMerchants()
           
-          // Map API response to component data
-          this.merchants = response.data || []
-          this.pagination = response.pagination || {
+          // Map API response to component data (handles both direct array and nested pagination wrapper)
+          const payload = response.data
+          this.merchants = Array.isArray(payload) ? payload : (payload?.data || [])
+          this.pagination = response.pagination || payload?.pagination || {
             current_page: 1,
             total_pages: 1,
             total_records: this.merchants.length,

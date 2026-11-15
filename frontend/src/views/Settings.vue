@@ -2,7 +2,7 @@
   <div id="main-container" class="flex flex-1">
     <MerchantSidebar v-if="isKeeper" />
     <aside v-else class="w-[280px] shrink-0 bg-white border-r border-monday-border p-6 flex flex-col gap-6">
-      <img src="@/assets/images/logos/logo.svg" class="h-8 w-fit" alt="logo">
+      <BrandLogo />
       <router-link to="/overview" class="btn btn-primary font-semibold text-center">
         Back to Overview
       </router-link>
@@ -64,6 +64,7 @@ import { useAuthStore } from '@/stores/auth'
 import { APP_CONFIG } from '@/config/app'
 import MerchantSidebar from '@/components/MerchantSidebar.vue'
 import MerchantTopBar from '@/components/MerchantTopBar.vue'
+import BrandLogo from '@/components/BrandLogo.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()

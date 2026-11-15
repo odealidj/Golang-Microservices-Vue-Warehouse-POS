@@ -6,7 +6,7 @@ COPY pkg/observability ./pkg/observability
 COPY merchant-service/go.mod merchant-service/go.sum ./merchant-service/
 
 WORKDIR /app/merchant-service
-RUN go mod download && go mod verify
+RUN go mod download
 
 WORKDIR /app
 COPY merchant-service ./merchant-service

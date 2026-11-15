@@ -15,13 +15,7 @@
       </div>
       <div class="flex flex-1 items-center justify-center">
         <form @submit.prevent="handleLogin" class="flex flex-col w-[435px] shrink-0 rounded-3xl gap-10 p-6 bg-white">
-          <img 
-            src="@/assets/images/logos/logo.svg" 
-            class="w-[203px] mx-auto" 
-            alt="logo"
-            @error="handleLogoError"
-            @load="handleLogoLoad"
-          >
+          <BrandLogo size="lg" class="mx-auto" />
           <div class="flex flex-col gap-[30px]">
             <div class="flex flex-col gap-3 text-center">
               <p class="font-semibold text-2xl">Hey🙌🏻, Welcome Back!</p>
@@ -97,9 +91,13 @@
   
   <script>
   import { useAuthStore } from '@/stores/auth'
+  import BrandLogo from '@/components/BrandLogo.vue'
   
   export default {
     name: 'Login',
+    components: {
+      BrandLogo
+    },
     data() {
       return {
         form: {

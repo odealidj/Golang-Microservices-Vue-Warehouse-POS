@@ -6,7 +6,7 @@ COPY pkg/observability ./pkg/observability
 COPY transaction-service/go.mod transaction-service/go.sum ./transaction-service/
 
 WORKDIR /app/transaction-service
-RUN go mod download && go mod verify
+RUN go mod download
 
 WORKDIR /app
 COPY transaction-service ./transaction-service

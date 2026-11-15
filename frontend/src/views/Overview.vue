@@ -260,7 +260,7 @@ export default {
         this.loading = true
         // Menggunakan merchant_id=6 dan limit=10 sesuai dengan endpoint yang diberikan
         const response = await getTransactions('?limit=2')
-        this.transactions = response.transactions || []
+        this.transactions = response.data?.transactions || response.transactions || []
         
     
         
