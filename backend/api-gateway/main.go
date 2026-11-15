@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -23,7 +24,7 @@ import (
 	"micro-warehouse/observability"
 )
 
-var proxyHTTPClient = &http.Client{Timeout: 30 * time.Second}
+var proxyHTTPClient = observability.NewTracedHTTPClient(30 * time.Second)
 
 type ServiceConfig struct {
 	Name string
@@ -46,6 +47,17 @@ func main() {
 	config := loadConfig()
 	jwtConfig := jwtConf.LoadJWTConfig()
 	redisConfig := jwtConf.LoadRedisConfig()
+
+	shutdownTracing, err := observability.InitTracing(context.Background(), "api-gateway")
+	if err != nil {
+		log.Printf("Warning: failed to initialize tracing: %v", err)
+	} else {
+		defer func() {
+			shutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			_ = shutdownTracing(shutCtx)
+		}()
+	}
 
 	var redisClient *redis.Client
 	if redisConfig.Host != "" {
@@ -100,6 +112,7 @@ func buildApp(config Config, jwtConfig middleware.JWTConfig, redisClient *redis.
 		AllowMethods: "GET, POST, PUT, DELETE, OPTIONS",
 	}))
 	observability.RegisterMetrics(app, "api-gateway")
+	app.Use(observability.TracingMiddleware("api-gateway"))
 
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
@@ -254,7 +267,7 @@ func proxyRequest(c *fiber.Ctx, targetURL string) error {
 }
 
 func forwardProxyRequest(c *fiber.Ctx, targetURL, fullURL string, includeUserHeaders bool) error {
-	req, err := http.NewRequest(c.Method(), fullURL, bytes.NewReader(c.Body()))
+	req, err := http.NewRequestWithContext(c.UserContext(), c.Method(), fullURL, bytes.NewReader(c.Body()))
 	if err != nil {
 		log.Printf("Error creating request: %v", err)
 		return c.Status(500).JSON(fiber.Map{

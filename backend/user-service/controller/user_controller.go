@@ -34,7 +34,7 @@ type userController struct {
 
 // AssignUserToRole implements UserControllerInterface.
 func (u *userController) AssignUserToRole(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	req := request.AssignUserToRoleRequest{}
 	if err := c.BodyParser(&req); err != nil {
 		log.Errorf("[UserController] AssignUserToRole - 1: %v", err)
@@ -64,7 +64,7 @@ func (u *userController) AssignUserToRole(c *fiber.Ctx) error {
 
 // CreateUser implements UserControllerInterface.
 func (u *userController) CreateUser(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	req := request.CreateUserRequest{}
 	if err := c.BodyParser(&req); err != nil {
 		log.Errorf("[UserController] CreateUser - 1: %v", err)
@@ -102,7 +102,7 @@ func (u *userController) CreateUser(c *fiber.Ctx) error {
 
 // DeleteUser implements UserControllerInterface.
 func (u *userController) DeleteUser(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	id := c.Params("id")
 
 	userID := conv.StringToUint(id)
@@ -121,7 +121,7 @@ func (u *userController) DeleteUser(c *fiber.Ctx) error {
 
 // EditAssignUserToRole implements UserControllerInterface.
 func (u *userController) EditAssignUserToRole(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	req := request.AssignUserToRoleRequest{}
 	if err := c.BodyParser(&req); err != nil {
 		log.Errorf("[UserController] EditAssignUserToRole - 1: %v", err)
@@ -154,7 +154,7 @@ func (u *userController) EditAssignUserToRole(c *fiber.Ctx) error {
 
 // GetAllUserRoles implements UserControllerInterface.
 func (u *userController) GetAllUserRoles(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 
 	var req request.GetAllUsersRequest
 	if err := c.QueryParser(&req); err != nil {
@@ -221,7 +221,7 @@ func (u *userController) GetAllUserRoles(c *fiber.Ctx) error {
 
 // GetAllUsers implements UserControllerInterface.
 func (u *userController) GetAllUsers(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 
 	var req request.GetAllUsersRequest
 	if err := c.QueryParser(&req); err != nil {
@@ -286,7 +286,7 @@ func (u *userController) GetAllUsers(c *fiber.Ctx) error {
 
 // GetUserByID implements UserControllerInterface.
 func (u *userController) GetUserByID(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	id := c.Params("id")
 
 	userID := conv.StringToUint(id)
@@ -320,7 +320,7 @@ func (u *userController) GetUserByID(c *fiber.Ctx) error {
 
 // GetUserByRoleName implements UserControllerInterface.
 func (u *userController) GetUserByRoleName(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	roleName := c.Params("roleName")
 
 	users, err := u.userUsecase.GetUserByRoleName(ctx, roleName)
@@ -356,7 +356,7 @@ func (u *userController) GetUserByRoleName(c *fiber.Ctx) error {
 
 // GetUserRoleByID implements UserControllerInterface.
 func (u *userController) GetUserRoleByID(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	userRoleIDStr := c.Params("userRoleID")
 	userRoleID := conv.StringToUint(userRoleIDStr)
 
@@ -376,7 +376,7 @@ func (u *userController) GetUserRoleByID(c *fiber.Ctx) error {
 
 // UpdateUser implements UserControllerInterface.
 func (u *userController) UpdateUser(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	id := c.Params("id")
 
 	var req request.UpdateUserRequest

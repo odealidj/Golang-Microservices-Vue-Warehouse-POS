@@ -31,7 +31,7 @@ type warehouseProductController struct {
 
 // CreateWarehouseProduct implements WarehouseProductControllerInterface.
 func (w *warehouseProductController) CreateWarehouseProduct(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 
 	var req request.CreateWarehouseProductRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -71,7 +71,7 @@ func (w *warehouseProductController) CreateWarehouseProduct(c *fiber.Ctx) error 
 
 // DeleteAllWarehouseProductByProductID implements WarehouseProductControllerInterface.
 func (w *warehouseProductController) DeleteAllWarehouseProductByProductID(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	productID := c.Params("product_id")
 	productIDUint := conv.StringToUint(productID)
 
@@ -89,7 +89,7 @@ func (w *warehouseProductController) DeleteAllWarehouseProductByProductID(c *fib
 
 // DeleteWarehouseProduct implements WarehouseProductControllerInterface.
 func (w *warehouseProductController) DeleteWarehouseProduct(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	warehouseProductID := c.Params("warehouse_product_id")
 	warehouseProductIDUint := conv.StringToUint(warehouseProductID)
 
@@ -107,7 +107,7 @@ func (w *warehouseProductController) DeleteWarehouseProduct(c *fiber.Ctx) error 
 
 // GetDetailWarehouse implements WarehouseProductControllerInterface.
 func (w *warehouseProductController) GetDetailWarehouse(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	warehouseID := c.Params("warehouse_id")
 	warehouseIDUint := conv.StringToUint(warehouseID)
 
@@ -160,7 +160,7 @@ func (w *warehouseProductController) GetDetailWarehouse(c *fiber.Ctx) error {
 
 // GetDetailWarehouseProductByID implements WarehouseProductControllerInterface.
 func (w *warehouseProductController) GetDetailWarehouseProductByID(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	warehouseProductID := c.Params("warehouse_product_id")
 	warehouseProductIDUint := conv.StringToUint(warehouseProductID)
 
@@ -195,7 +195,7 @@ func (w *warehouseProductController) GetDetailWarehouseProductByID(c *fiber.Ctx)
 
 // GetProductTotalStock implements WarehouseProductControllerInterface.
 func (w *warehouseProductController) GetProductTotalStock(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	productID := c.Params("product_id")
 	productIDUint := conv.StringToUint(productID)
 
@@ -220,7 +220,7 @@ func (w *warehouseProductController) GetProductTotalStock(c *fiber.Ctx) error {
 
 // GetWarehouseProductByProductID implements WarehouseProductControllerInterface.
 func (w *warehouseProductController) GetWarehouseProductByProductID(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	productID := c.Params("product_id")
 	productIDUint := conv.StringToUint(productID)
 
@@ -251,7 +251,7 @@ func (w *warehouseProductController) GetWarehouseProductByProductID(c *fiber.Ctx
 
 // GetWarehouseProductByWarehouseIDAndProductID implements WarehouseProductControllerInterface.
 func (w *warehouseProductController) GetWarehouseProductByWarehouseIDAndProductID(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	warehouseID := c.Params("warehouse_id")
 	warehouseIDUint := conv.StringToUint(warehouseID)
 	productID := c.Params("product_id")
@@ -280,7 +280,7 @@ func (w *warehouseProductController) GetWarehouseProductByWarehouseIDAndProductI
 
 // UpdateWarehouseProduct implements WarehouseProductControllerInterface.
 func (w *warehouseProductController) UpdateWarehouseProduct(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	warehouseProductID := c.Params("warehouse_product_id")
 	warehouseProductIDUint := conv.StringToUint(warehouseProductID)
 	warehouseID := c.Params("warehouse_id")

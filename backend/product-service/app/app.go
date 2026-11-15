@@ -37,6 +37,18 @@ func RunServer() {
 	}))
 	observability.RegisterMetrics(app, "product-service")
 
+	shutdownTracing, err := observability.InitTracing(context.Background(), "product-service")
+	if err != nil {
+		log.Warnf("Failed to initialize tracing: %v", err)
+	} else {
+		defer func() {
+			shutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			_ = shutdownTracing(shutCtx)
+		}()
+	}
+	app.Use(observability.TracingMiddleware("product-service"))
+
 	app.Use(middlewareGateway.GatewayAuth())
 
 	container := BuildContainer()

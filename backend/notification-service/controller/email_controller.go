@@ -27,7 +27,7 @@ func (e *EmailController) SendEmail(c *fiber.Ctx) error {
 		})
 	}
 
-	err := e.emailUseCase.SendEmail(c.Context(), req)
+	err := e.emailUseCase.SendEmail(c.UserContext(), req)
 	if err != nil {
 		log.Errorf("[EmailController] SendEmail - 2: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -49,7 +49,7 @@ func (e *EmailController) SendWelcomeEmail(c *fiber.Ctx) error {
 		})
 	}
 
-	err := e.emailUseCase.SendWelcomeEmail(c.Context(), req)
+	err := e.emailUseCase.SendWelcomeEmail(c.UserContext(), req)
 	if err != nil {
 		log.Errorf("[EmailController] SendWelcomeEmail - 2: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

@@ -8,6 +8,7 @@ import (
 	"io"
 	"micro-warehouse/transaction-service/configs"
 	"micro-warehouse/transaction-service/pkg/jwt"
+	"micro-warehouse/observability"
 	"net/http"
 	"time"
 
@@ -278,9 +279,7 @@ type MerchantProduct struct {
 
 func NewMerchantClient(cfg configs.Config) MerchantClientInterface {
 	return &MerchantClient{
-		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
-		},
+		httpClient: observability.NewTracedHTTPClient(30 * time.Second),
 		UrlApiGateway: cfg.App.UrlApiGateway,
 		config:        cfg,
 	}

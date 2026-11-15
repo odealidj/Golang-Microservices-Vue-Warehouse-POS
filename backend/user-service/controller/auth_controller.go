@@ -21,7 +21,7 @@ type AuthController struct {
 
 // Login implements AuthControllerInterface.
 func (a *AuthController) Login(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	var loginRequest request.LoginRequest
 	if err := c.BodyParser(&loginRequest); err != nil {
 		log.Errorf("[AuthController.Login] Login - 1: %v", err.Error())

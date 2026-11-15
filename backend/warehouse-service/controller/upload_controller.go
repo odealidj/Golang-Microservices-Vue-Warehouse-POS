@@ -26,7 +26,7 @@ func (u *uploadController) UploadPhoto(c *fiber.Ctx) error {
 		})
 	}
 
-	result, err := u.fileUploadHelper.UploadPhoto(c.Context(), file)
+	result, err := u.fileUploadHelper.UploadPhoto(c.UserContext(), file)
 	if err != nil {
 		log.Errorf("[UploadController] UploadPhoto - 2: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

@@ -161,12 +161,25 @@ services:
     depends_on:
       - prometheus
 
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: warehouse_jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+
   user-service:
     build:
       context: .
       dockerfile: user-service/Dockerfile
     env_file:
       - ./user-service/.env
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     ports:
       - "8081:8081"
     depends_on:
@@ -189,6 +202,8 @@ services:
       dockerfile: product-service/Dockerfile
     env_file:
       - ./product-service/.env
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     ports:
       - "8082:8082"
     depends_on:
@@ -211,6 +226,8 @@ services:
       dockerfile: transaction-service/Dockerfile
     env_file:
       - ./transaction-service/.env
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     ports:
       - "8085:8085"
     depends_on:
@@ -237,6 +254,8 @@ services:
       dockerfile: warehouse-service/Dockerfile
     env_file:
       - ./warehouse-service/.env
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     ports:
       - "8083:8083"
     depends_on:
@@ -261,6 +280,8 @@ services:
       dockerfile: merchant-service/Dockerfile
     env_file:
       - ./merchant-service/.env
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     ports:
       - "8084:8084"
     depends_on:
@@ -287,6 +308,8 @@ services:
       dockerfile: notification-service/Dockerfile
     env_file:
       - ./notification-service/.env
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     ports:
       - "8086:8086"
     depends_on:
@@ -310,6 +333,8 @@ services:
     container_name: warehouse_api_gateway
     env_file:
       - ./api-gateway/.env
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     ports:
       - "8080:8080"
     depends_on:

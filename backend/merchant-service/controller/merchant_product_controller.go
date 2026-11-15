@@ -31,7 +31,7 @@ type merchantProductController struct {
 
 // CreateMerchantProduct implements MerchantProductControllerInterface.
 func (m *merchantProductController) CreateMerchantProduct(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	var req request.CreateMerchantProductRequest
 	if err := c.BodyParser(&req); err != nil {
 		log.Errorf("[MerchantProductController] CreateMerchantProduct - 1: %v", err)
@@ -68,7 +68,7 @@ func (m *merchantProductController) CreateMerchantProduct(c *fiber.Ctx) error {
 
 // DeleteAllProductMerchantProducts implements MerchantProductControllerInterface.
 func (m *merchantProductController) DeleteAllProductMerchantProducts(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	productID := c.Params("product_id")
 	productIDUint := conv.StringToUint(productID)
 
@@ -86,7 +86,7 @@ func (m *merchantProductController) DeleteAllProductMerchantProducts(c *fiber.Ct
 
 // DeleteMerchantProduct implements MerchantProductControllerInterface.
 func (m *merchantProductController) DeleteMerchantProduct(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	merchantProductID := c.Params("merchant_product_id")
 	merchantProductIDUint := conv.StringToUint(merchantProductID)
 
@@ -104,7 +104,7 @@ func (m *merchantProductController) DeleteMerchantProduct(c *fiber.Ctx) error {
 
 // GetMerchantProductByBarcode implements MerchantProductControllerInterface.
 func (m *merchantProductController) GetMerchantProductByBarcode(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	barcode := c.Params("barcode")
 	merchantID := c.Params("merchant_id")
 	merchantIDUint := conv.StringToUint(merchantID)
@@ -140,7 +140,7 @@ func (m *merchantProductController) GetMerchantProductByBarcode(c *fiber.Ctx) er
 
 // GetMerchantProductByID implements MerchantProductControllerInterface.
 func (m *merchantProductController) GetMerchantProductByID(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	merchantProductID := c.Params("merchant_product_id")
 	merchantProductIDUint := conv.StringToUint(merchantProductID)
 
@@ -172,7 +172,7 @@ func (m *merchantProductController) GetMerchantProductByID(c *fiber.Ctx) error {
 
 // GetMerchantProducts implements MerchantProductControllerInterface.
 func (m *merchantProductController) GetMerchantProducts(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 
 	var req request.GetMerchantProductRequest
 	if err := c.QueryParser(&req); err != nil {
@@ -250,7 +250,7 @@ func (m *merchantProductController) GetMerchantProducts(c *fiber.Ctx) error {
 
 // GetProductTotalStock implements MerchantProductControllerInterface.
 func (m *merchantProductController) GetProductTotalStock(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	productID := c.Params("product_id")
 	productIDUint := conv.StringToUint(productID)
 
@@ -270,7 +270,7 @@ func (m *merchantProductController) GetProductTotalStock(c *fiber.Ctx) error {
 
 // UpdateMerchantProduct implements MerchantProductControllerInterface.
 func (m *merchantProductController) UpdateMerchantProduct(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	merchantProductID := c.Params("merchant_product_id")
 	merchantProductIDUint := conv.StringToUint(merchantProductID)
 

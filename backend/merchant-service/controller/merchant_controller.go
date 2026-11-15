@@ -51,7 +51,7 @@ func (m *merchantController) CreateMerchant(c *fiber.Ctx) error {
 		Photo:    req.Photo,
 	}
 
-	if err := m.merchantUsecase.CreateMerchant(c.Context(), &reqModel); err != nil {
+	if err := m.merchantUsecase.CreateMerchant(c.UserContext(), &reqModel); err != nil {
 		log.Errorf("[MerchantController] CreateMerchant - 3: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Failed to create merchant",
@@ -68,7 +68,7 @@ func (m *merchantController) DeleteMerchant(c *fiber.Ctx) error {
 	id := c.Params("id")
 	merchantID := conv.StringToUint(id)
 
-	if err := m.merchantUsecase.DeleteMerchant(c.Context(), merchantID); err != nil {
+	if err := m.merchantUsecase.DeleteMerchant(c.UserContext(), merchantID); err != nil {
 		log.Errorf("[MerchantController] DeleteMerchant - 1: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
@@ -102,7 +102,7 @@ func (m *merchantController) GetAllMerchants(c *fiber.Ctx) error {
 		productMap := make(map[uint]*httpclient.ProductResponse)
 		warehouseMap := make(map[uint]*httpclient.WarehouseResponse)
 
-		merchant, products, warehouses, err := m.merchantUsecase.GetMerchantByKeeperID(c.Context(), req.KeeperID)
+		merchant, products, warehouses, err := m.merchantUsecase.GetMerchantByKeeperID(c.UserContext(), req.KeeperID)
 		if err != nil {
 			log.Errorf("[MerchantController] GetAllMerchants - 2: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -116,7 +116,7 @@ func (m *merchantController) GetAllMerchants(c *fiber.Ctx) error {
 			})
 		}
 
-		keeperNames, err := m.merchantUsecase.GetKeeperName(c.Context(), merchant.KeeperID)
+		keeperNames, err := m.merchantUsecase.GetKeeperName(c.UserContext(), merchant.KeeperID)
 		if err != nil {
 			log.Errorf("[MerchantController] GetAllMerchants - 3: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -177,7 +177,7 @@ func (m *merchantController) GetAllMerchants(c *fiber.Ctx) error {
 		})
 	}
 
-	merchants, total, err := m.merchantUsecase.GetAllMerchants(c.Context(), req.Page, req.Limit, req.Search, req.SortBy, req.SortOrder)
+	merchants, total, err := m.merchantUsecase.GetAllMerchants(c.UserContext(), req.Page, req.Limit, req.Search, req.SortBy, req.SortOrder)
 	if err != nil {
 		log.Errorf("[MerchantController] GetAllMerchants - 4: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -196,7 +196,7 @@ func (m *merchantController) GetAllMerchants(c *fiber.Ctx) error {
 
 	var merchantsResponse []response.MerchantResponse
 	for _, merchant := range merchants {
-		keeperName, err := m.merchantUsecase.GetKeeperName(c.Context(), merchant.KeeperID)
+		keeperName, err := m.merchantUsecase.GetKeeperName(c.UserContext(), merchant.KeeperID)
 		if err != nil {
 			log.Errorf("[MerchantController] GetAllMerchants - 5: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -233,7 +233,7 @@ func (m *merchantController) GetMerchantByID(c *fiber.Ctx) error {
 	idStr := c.Params("id")
 	id := conv.StringToUint(idStr)
 
-	merchant, err := m.merchantUsecase.GetMerchantByID(c.Context(), id)
+	merchant, err := m.merchantUsecase.GetMerchantByID(c.UserContext(), id)
 	if err != nil {
 		log.Errorf("[MerchantController] GetMerchantByID - 1: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -243,7 +243,7 @@ func (m *merchantController) GetMerchantByID(c *fiber.Ctx) error {
 
 	var keeperName string
 	if merchant.KeeperID != 0 {
-		keeperName, err = m.merchantUsecase.GetKeeperName(c.Context(), merchant.KeeperID)
+		keeperName, err = m.merchantUsecase.GetKeeperName(c.UserContext(), merchant.KeeperID)
 		if err != nil {
 			log.Errorf("[MerchantController] GetMerchantByID - 2: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -298,7 +298,7 @@ func (m *merchantController) UpdateMerchant(c *fiber.Ctx) error {
 		Photo:    req.Photo,
 	}
 
-	if err := m.merchantUsecase.UpdateMerchant(c.Context(), &reqModel); err != nil {
+	if err := m.merchantUsecase.UpdateMerchant(c.UserContext(), &reqModel); err != nil {
 		log.Errorf("[MerchantController] UpdateMerchant - 3: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Failed to update merchant",
