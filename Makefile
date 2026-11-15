@@ -1,6 +1,6 @@
 .PHONY: help setup-env build up down logs ps test-backend vet-backend lint-backend vulncheck-backend generate-mocks verify-mocks test-integration-gateway test-integration load-test test-frontend build-frontend dev-frontend test
 
-SERVICES := api-gateway merchant-service notification-service product-service transaction-service user-service warehouse-service
+SERVICES := api-gateway merchant-service notification-service product-service transaction-service user-service warehouse-service pkg/observability
 MOCK_SERVICES := notification-service product-service transaction-service user-service warehouse-service
 
 help:

@@ -2,12 +2,16 @@ FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY pkg/observability ./pkg/observability
+COPY merchant-service/go.mod merchant-service/go.sum ./merchant-service/
 
+WORKDIR /app/merchant-service
 RUN go mod download && go mod verify
 
-COPY . .
+WORKDIR /app
+COPY merchant-service ./merchant-service
 
+WORKDIR /app/merchant-service
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
 FROM alpine:latest
@@ -16,7 +20,7 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
-COPY --from=builder /app/main .
+COPY --from=builder /app/merchant-service/main .
 
 EXPOSE 8084
 

@@ -26,6 +26,7 @@ jobs:
           - transaction-service
           - user-service
           - warehouse-service
+          - pkg/observability
     steps:
       - uses: actions/checkout@v4
 

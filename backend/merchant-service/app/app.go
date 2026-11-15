@@ -6,6 +6,7 @@ import (
 	"micro-warehouse/merchant-service/database"
 	"micro-warehouse/merchant-service/pkg/rabbitmq"
 	"micro-warehouse/merchant-service/repository"
+	"micro-warehouse/observability"
 
 	"os"
 	"os/signal"
@@ -38,6 +39,7 @@ func RunServer() {
 	app.Use(logger.New(logger.Config{
 		Format: "[${time}] $ip ${status} - ${latency}  ${method}  ${path}\n",
 	}))
+	observability.RegisterMetrics(app, "merchant-service")
 
 	app.Use(middlewareGateway.GatewayAuth())
 

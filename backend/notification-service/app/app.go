@@ -5,6 +5,7 @@ import (
 	"micro-warehouse/notificaiton-service/configs"
 	"micro-warehouse/notificaiton-service/pkg/email"
 	"micro-warehouse/notificaiton-service/pkg/rabbitmq"
+	"micro-warehouse/observability"
 	"os"
 	"os/signal"
 	"syscall"
@@ -54,6 +55,7 @@ func RunServer() {
 	app.Use(logger.New(logger.Config{
 		Format: "[${time}] ${ip} ${status} - ${latency} ${method} ${path}\n",
 	}))
+	observability.RegisterMetrics(app, "notification-service")
 
 	app.Use(middlewareGateway.GatewayAuth())
 
