@@ -53,6 +53,10 @@ flowchart LR
     WS --> SUP
     MS --> SUP
     NS --> SMTP["SMTP Server"]
+
+    GW -.->|"GET /metrics (feat/metrics-prometheus)"| PROM["Prometheus (9090)"]
+    PROM -.->|"Datasource (opsional)"| GRAF["Grafana (3001)"]
+    GW -.->|"OTLP HTTP :4318 (feat/distributed-tracing)"| JAEGER["Jaeger UI (16686)"]
 ```
 
 ---
@@ -78,3 +82,7 @@ flowchart LR
 3. **Authoritative Server-Side Pricing**: Nominal transaksi (`Price`, `SubTotal`, `TaxTotal` PPN 11%, `GrandTotal`) selalu dihitung ulang di `transaction-service` berdasarkan harga master dari `product-service`, bukan mempercayai harga dari payload frontend.
 4. **Resilient Rate Limiting**: `api-gateway` memakai Redis rate limiter untuk skala terdistribusi dan otomatis beralih (*graceful fallback*) ke in-memory rate limiter jika Redis tidak dapat dijangkau.
 5. **Clean Architecture per Service**: Struktur kode seragam di seluruh backend (`controller` → `usecase` → `repository` → `model`) dengan perakitan dependensi di `app/container.go`.
+6. **Observability Terpisah per Branch Fitur**:
+   - *Metrics (`feat/metrics-prometheus`)*: Seluruh 7 service Go mengekspor metrik HTTP Prometheus (`http_requests_total`, `http_request_duration_seconds`) di `GET /metrics`, di-scrape Prometheus (`:9090`), dengan opsi dashboard Grafana (`:3001` via `--profile grafana`).
+   - *Distributed Tracing (`feat/distributed-tracing`)*: OpenTelemetry Go SDK mengekspor trace via OTLP HTTP ke Jaeger (`:16686`) dengan propagasi W3C `traceparent`, header respons `X-Trace-ID`, `c.UserContext()`, dan `NewTracedHTTPClient`.
+7. **Verifikasi Berlapis (`make test`, Integration, & `feat/load-testing`)**: Mendukung unit test tanpa dependensi eksternal (`make test`), gateway integration test (`make test-integration-gateway`), E2E integration test (`make test-integration`), serta load testing k6 (`make load-test` pada branch `feat/load-testing`). Detail lengkap tersedia di [05 - Observability & Pengujian](05-observability-dan-pengujian.md).

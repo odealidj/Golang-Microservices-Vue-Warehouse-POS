@@ -80,6 +80,20 @@ flowchart LR
 - **Authoritative Server-Side Pricing**: `transaction-service` mengambil harga produk langsung dari `product-service` dan menghitung subtotal + PPN 11% di sisi server (tidak mempercayai nominal harga dari payload client).
 - **Verified Payment Webhooks**: Callback Midtrans memverifikasi `signature_key` menggunakan `SHA512(order_id + status_code + gross_amount + server_key)` dengan perbandingan *constant-time*.
 - **Clean Architecture**: Setiap service memisahkan layer `controller` → `usecase` → `repository` → `model` dengan dependency injection di `app/container.go`.
+- **Observability & Load Testing (Modular Branch)**: Metrics Prometheus + Grafana opsional (`feat/metrics-prometheus`), Distributed Tracing OpenTelemetry + Jaeger (`feat/distributed-tracing`), dan skrip k6 load testing (`feat/load-testing`). Lihat [`docs/05-observability-dan-pengujian.md`](docs/05-observability-dan-pengujian.md).
+
+---
+
+## Branch Fitur
+
+Repository ini memisahkan fitur observability dan load testing ke 3 branch independen dari `main`:
+
+| Branch | Fitur | Komponen Utama |
+|---|---|---|
+| `main` | Core Platform | 7 microservices Go, Vue 3 SPA, unit test, integration test, Docker Compose, GitHub Actions CI, `docs/` |
+| `feat/metrics-prometheus` | Metrics & Monitoring | `backend/pkg/observability/metrics.go` (`GET /metrics`), Prometheus (`:9090`), Grafana opsional (`:3001` via `--profile grafana`) |
+| `feat/distributed-tracing` | Distributed Tracing | `backend/pkg/observability/tracing.go` (`InitTracing`, `TracingMiddleware`, `NewTracedHTTPClient`, `X-Trace-ID`), Jaeger UI (`:16686`) |
+| `feat/load-testing` | Load Testing | Skrip k6 `backend/tests/load/smoke_and_pos.js` & target `make load-test` |
 
 ---
 
@@ -96,15 +110,19 @@ flowchart LR
 │   ├── transaction-service/
 │   ├── notification-service/
 │   ├── tests/integration/      # E2E integration test lintas service (build tag: integration)
+│   ├── pkg/observability/      # [Branch fitur] Shared metrics Prometheus & OpenTelemetry tracing
+│   ├── observability/          # [feat/metrics-prometheus] Konfigurasi Prometheus & Grafana datasource
+│   ├── tests/load/             # [feat/load-testing] Skrip load testing k6
 │   └── docker-compose.yml
 ├── frontend/                   # Vue 3 + Vite + Pinia + Tailwind CSS + QuaggaJS
 ├── docs/
-│   ├── README.md                   # Indeks dokumentasi arsitektur & teknis
-│   ├── 01-gambaran-umum-sistem.md  # System overview, container architecture & katalog service
-│   ├── 02-proses-bisnis.md         # Diagram proses bisnis, RBAC & siklus status pembayaran
-│   ├── 03-proses-teknis.md         # Sequence diagram, topologi RabbitMQ & peta routing gateway
-│   ├── 04-erd-dan-data-model.md    # ERD 6 database PostgreSQL & relasi logis lintas service
-│   └── postman_collection.json     # Koleksi endpoint API untuk pengujian
+│   ├── README.md                           # Indeks dokumentasi arsitektur & teknis
+│   ├── 01-gambaran-umum-sistem.md          # System overview, container architecture & katalog service
+│   ├── 02-proses-bisnis.md                 # Diagram proses bisnis, RBAC & siklus status pembayaran
+│   ├── 03-proses-teknis.md                 # Sequence diagram, topologi RabbitMQ & peta routing gateway
+│   ├── 04-erd-dan-data-model.md            # ERD 6 database PostgreSQL & relasi logis lintas service
+│   ├── 05-observability-dan-pengujian.md   # Panduan Metrics, Distributed Tracing & k6 Load Testing
+│   └── postman_collection.json             # Koleksi endpoint API untuk pengujian
 ├── .github/workflows/ci.yml    # GitHub Actions CI (Go test/vet, frontend test & Vite build)
 └── Makefile                    # Shortcut setup, Docker, testing, dan build
 ```
@@ -134,6 +152,7 @@ make up
 make ps
 ```
 API Gateway akan aktif di `http://localhost:8080` (`GET /health`) dan RabbitMQ Management UI di `http://localhost:15672` (`guest`/`guest`).
+*(Pada branch observability terpisah tersedia juga Prometheus `:9090`, Grafana opsional `:3001`, dan Jaeger UI `:16686`.)*
 
 Akun default hasil auto-seeder (`user-service`):
 - **Email**: `manager@mail.com`
@@ -175,3 +194,24 @@ Integration test dipisahkan menggunakan build tag `//go:build integration` agar 
   make test-integration
   ```
   Opsional: atur `API_GATEWAY_URL` (default `http://localhost:8080`) atau `MIDTRANS_SERVER_KEY` untuk ikut memverifikasi signature callback Midtrans.
+
+### Observability & Load Testing (Per Branch)
+
+Detail konfigurasi lengkap tersedia di [`docs/05-observability-dan-pengujian.md`](docs/05-observability-dan-pengujian.md).
+
+- **Metrics Prometheus (`feat/metrics-prometheus`)**:
+  ```bash
+  git checkout feat/metrics-prometheus
+  make up                                               # Prometheus aktif di http://localhost:9090
+  cd backend && docker compose --profile grafana up -d  # Opsional: Grafana di http://localhost:3001 (admin/admin)
+  ```
+- **Distributed Tracing OpenTelemetry + Jaeger (`feat/distributed-tracing`)**:
+  ```bash
+  git checkout feat/distributed-tracing
+  make up   # Jaeger UI aktif di http://localhost:16686 (OTLP HTTP :4318)
+  ```
+- **Load Testing k6 (`feat/load-testing`)**:
+  ```bash
+  git checkout feat/load-testing
+  make up && make load-test
+  ```

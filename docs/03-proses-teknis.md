@@ -143,6 +143,7 @@ sequenceDiagram
 | Prefix Path | Autentikasi | Rate Limit | Service Tujuan |
 |---|---|---|---|
 | `GET /health` | Publik | Global | Internal API Gateway |
+| `GET /metrics` *(branch `feat/metrics-prometheus`)* | Publik | Global | Prometheus Metrics (API Gateway & tiap service) |
 | `POST /api/v1/auth/login` | Publik | Auth (`10 req/min`) | `user-service` (`:8081`) |
 | `POST /api/v1/midtrans/callback` | Publik (verifikasi SHA512 di service) | Global | `transaction-service` (`:8085`) |
 | `/api/v1/users*`, `/api/v1/roles*`, `/api/v1/assign-role*`, `/api/v1/upload*` | JWT Protected | API (`100 req/min`) | `user-service` (`:8081`) |
@@ -150,3 +151,42 @@ sequenceDiagram
 | `/api/v1/warehouses*`, `/api/v1/warehouse-products*`, `/api/v1/upload-warehouse*` | JWT Protected | API (`100 req/min`) | `warehouse-service` (`:8083`) |
 | `/api/v1/merchants*`, `/api/v1/merchant-products*`, `/api/v1/upload-merchant*` | JWT Protected | API (`100 req/min`) | `merchant-service` (`:8084`) |
 | `/api/v1/transactions*`, `/api/v1/dashboard*` | JWT Protected | API (`100 req/min`) | `transaction-service` (`:8085`) |
+
+---
+
+## 3.7 Alur Distributed Tracing Lintas Service *(branch `feat/distributed-tracing`)*
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as "Vue 3 SPA / API Client"
+    participant GW as "API Gateway (:8080)"
+    participant MS as "merchant-service (:8084)"
+    participant WS as "warehouse-service (:8083)"
+    participant JAEGER as "Jaeger OTLP (:4318 / UI :16686)"
+
+    Client->>GW: "HTTP Request (+ traceparent opsional)"
+    GW->>GW: "TracingMiddleware: Start Server Span & c.SetUserContext(ctx)"
+    GW->>MS: "Proxy + W3C traceparent/tracestate"
+    MS->>MS: "TracingMiddleware + controller teruskan c.UserContext()"
+    MS->>WS: "NewTracedHTTPClient: Client Span + inject traceparent"
+    WS-->>MS: "200 OK"
+    MS-->>GW: "200 OK"
+    GW-->>Client: "200 OK + Header X-Trace-ID"
+    par "Batch Export OTLP HTTP (Asinkron)"
+        GW-->>JAEGER: "Spans (api-gateway)"
+        MS-->>JAEGER: "Spans (merchant-service)"
+        WS-->>JAEGER: "Spans (warehouse-service)"
+    end
+```
+
+---
+
+## 3.8 Alur Scraping Metrics Prometheus *(branch `feat/metrics-prometheus`)*
+
+```mermaid
+flowchart LR
+    REQ["HTTP Traffic"] -->|"Middleware"| OBS["RegisterMetrics (Fiber)<br/>http_requests_total &<br/>http_request_duration_seconds"]
+    OBS -->|"/metrics (exclude self-metric)"| PROM["Prometheus (:9090)<br/>scrape_interval: 15s"]
+    PROM -->|"Datasource (profile: grafana)"| GRAF["Grafana (:3001, Opsional)"]
+```
