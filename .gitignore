@@ -1,0 +1,19 @@
+# Environment & secrets
+.env
+*.env
+!.env.example
+!env.example
+
+# Dependencies & build artifacts
+node_modules/
+frontend/dist/
+backend/**/tmp/
+*.exe
+*.out
+*.test
+
+# OS & editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

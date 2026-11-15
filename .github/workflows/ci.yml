@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  backend:
+    name: Go Microservices (Test & Vet)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - merchant-service
+          - notification-service
+          - product-service
+          - transaction-service
+          - user-service
+          - warehouse-service
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache-dependency-path: backend/${{ matrix.service }}/go.sum
+
+      - name: Run go test
+        working-directory: backend/${{ matrix.service }}
+        run: go test -v ./...
+
+      - name: Run go vet
+        working-directory: backend/${{ matrix.service }}
+        run: go vet ./...
+
+  frontend:
+    name: Vue 3 Frontend (Build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run frontend tests
+        working-directory: frontend
+        run: npm test
+
+      - name: Build production bundle
+        working-directory: frontend
+        run: npm run build
