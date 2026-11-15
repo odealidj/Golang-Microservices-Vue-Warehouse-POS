@@ -98,6 +98,10 @@ func (r *RabbitMQService) PublishStockReducedEvent(ctx context.Context, event St
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	if err := ctx.Err(); err != nil {
+		return fmt.Errorf("publish context cancelled: %w", err)
+	}
+
 	err = r.ch.Publish(
 		"business_events",        // exchange
 		"merchant.stock.reduced", // routing key - lebih spesifik

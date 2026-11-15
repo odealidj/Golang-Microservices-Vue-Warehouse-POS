@@ -2,15 +2,21 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, "feat/**"]
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   backend:
-    name: Go Microservices (Test & Vet)
+    name: Go (${{ matrix.service }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         service:
           - api-gateway
@@ -26,19 +32,64 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.24"
+          go-version: "1.26.x"
           cache-dependency-path: backend/${{ matrix.service }}/go.sum
 
-      - name: Run go test
+      - name: Run go test (-race)
         working-directory: backend/${{ matrix.service }}
-        run: go test -v ./...
+        run: go test -race -v ./...
+
+      - name: Run API Gateway integration tests (-race)
+        if: matrix.service == 'api-gateway'
+        working-directory: backend/api-gateway
+        run: go test -tags=integration -race -v ./...
 
       - name: Run go vet
         working-directory: backend/${{ matrix.service }}
         run: go vet ./...
 
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.64.8
+          working-directory: backend/${{ matrix.service }}
+          args: --config=../../.golangci.yml ./...
+
+      - name: Run govulncheck
+        working-directory: backend/${{ matrix.service }}
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+  gomock:
+    name: GoMock Sync Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+          cache-dependency-path: backend/**/go.sum
+
+      - name: Install mockgen
+        run: go install go.uber.org/mock/mockgen@v0.6.0
+
+      - name: Verify generated mocks are up to date
+        run: make verify-mocks
+
+  compose:
+    name: Docker Compose Config Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate docker-compose.yml with env.example
+        run: |
+          make setup-env
+          cd backend && docker compose config -q
+
   frontend:
-    name: Vue 3 Frontend (Build)
+    name: Vue 3 Frontend (Test & Build)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -1,6 +1,7 @@
-.PHONY: help setup-env build up down logs ps test-backend vet-backend test-integration-gateway test-integration test-frontend build-frontend dev-frontend test
+.PHONY: help setup-env build up down logs ps test-backend vet-backend lint-backend vulncheck-backend generate-mocks verify-mocks test-integration-gateway test-integration test-frontend build-frontend dev-frontend test
 
 SERVICES := api-gateway merchant-service notification-service product-service transaction-service user-service warehouse-service
+MOCK_SERVICES := notification-service product-service transaction-service user-service warehouse-service
 
 help:
 	@echo "FMCG Multi-Warehouse & POS Platform - Available Commands:"
@@ -11,13 +12,17 @@ help:
 	@echo "  make down            Stop Docker Compose stack"
 	@echo "  make ps              Show running Docker containers"
 	@echo "  make logs            Tail Docker Compose logs"
-	@echo "  make test-backend    Run go test across all 7 Go microservices"
-	@echo "  make vet-backend     Run go vet across all 7 Go microservices"
-	@echo "  make test-integration-gateway  Run API Gateway HTTP integration tests (no Docker needed)"
+	@echo "  make test-backend       Run go test -race across all 7 Go microservices"
+	@echo "  make vet-backend        Run go vet across all 7 Go microservices"
+	@echo "  make lint-backend       Run golangci-lint across all 7 Go microservices"
+	@echo "  make vulncheck-backend  Run govulncheck vulnerability scan across all 7 Go microservices"
+	@echo "  make generate-mocks     Regenerate GoMock files via go generate"
+	@echo "  make verify-mocks       Ensure generated GoMock files match repository interfaces"
+	@echo "  make test-integration-gateway  Run API Gateway HTTP integration tests with -race (no Docker needed)"
 	@echo "  make test-integration          Run E2E integration tests against running Docker stack"
-	@echo "  make dev-frontend    Run Vue 3 Vite dev server"
-	@echo "  make build-frontend  Build Vue 3 production bundle"
-	@echo "  make test            Run all backend tests/vet and frontend production build"
+	@echo "  make dev-frontend       Run Vue 3 Vite dev server"
+	@echo "  make build-frontend     Build Vue 3 production bundle"
+	@echo "  make test               Run backend tests (-race), vet, golangci-lint, frontend tests & build"
 
 setup-env:
 	@for svc in $(SERVICES); do \
@@ -46,8 +51,8 @@ logs:
 
 test-backend:
 	@for svc in $(SERVICES); do \
-		echo "=== Testing $$svc ==="; \
-		(cd backend/$$svc && go test -v ./...) || exit 1; \
+		echo "=== Testing $$svc (-race) ==="; \
+		(cd backend/$$svc && go test -race -v ./...) || exit 1; \
 	done
 
 vet-backend:
@@ -56,11 +61,33 @@ vet-backend:
 		(cd backend/$$svc && go vet ./...) || exit 1; \
 	done
 
+lint-backend:
+	@for svc in $(SERVICES); do \
+		echo "=== Linting $$svc ==="; \
+		(cd backend/$$svc && golangci-lint run --config ../../.golangci.yml ./...) || exit 1; \
+	done
+
+vulncheck-backend:
+	@for svc in $(SERVICES); do \
+		echo "=== Scanning vulnerabilities $$svc ==="; \
+		(cd backend/$$svc && govulncheck ./...) || exit 1; \
+	done
+
+generate-mocks:
+	@for svc in $(MOCK_SERVICES); do \
+		echo "=== Generating mocks for $$svc ==="; \
+		(cd backend/$$svc && go generate ./...) || exit 1; \
+	done
+
+verify-mocks: generate-mocks
+	git diff --exit-code -- 'backend/*/mocks'
+	@test -z "$$(git status --porcelain -- 'backend/*/mocks')" || (echo "Untracked mock files found"; git status --short -- 'backend/*/mocks'; exit 1)
+
 dev-frontend:
 	cd frontend && npm run dev
 
 test-integration-gateway:
-	cd backend/api-gateway && go test -tags=integration -v ./...
+	cd backend/api-gateway && go test -tags=integration -race -v ./...
 
 test-integration:
 	cd backend/tests/integration && go test -tags=integration -v ./...
@@ -71,4 +98,4 @@ test-frontend:
 build-frontend:
 	cd frontend && npm run build
 
-test: test-backend vet-backend test-frontend build-frontend
+test: test-backend vet-backend lint-backend test-frontend build-frontend

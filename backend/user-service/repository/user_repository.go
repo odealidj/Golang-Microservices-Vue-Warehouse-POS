@@ -13,6 +13,8 @@ import (
 // ROLE: Get by id, get all, create, update, delete
 // USER ROLE: Assign User to role, getUserRoleByID, get all user role, edit assign user to role
 
+//go:generate mockgen -source=user_repository.go -destination=../mocks/mock_user_repository.go -package=mocks
+
 type UserRepositoryInterface interface {
 	CreateUser(ctx context.Context, user model.User) (*model.User, error)
 	GetAllUsers(ctx context.Context, page, limit int, search, sortBy, sortOrder string) ([]model.User, int64, error)

@@ -131,7 +131,9 @@ func (rc *RabbitMQConsumer) handleMessage(ctx context.Context, msg amqp.Delivery
 		return
 	}
 
-	msg.Ack(false)
+	if err := msg.Ack(false); err != nil {
+		log.Errorf("[RabbitMQConsumer] handleMessage - ack error: %v", err)
+	}
 }
 
 func (rc *RabbitMQConsumer) processStockReduction(ctx context.Context, event StockReductionEvent) error {

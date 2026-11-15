@@ -2,89 +2,41 @@ package usecase
 
 import (
 	"context"
-	"errors"
-	"micro-warehouse/product-service/model"
 	"testing"
+
+	"micro-warehouse/product-service/mocks"
+	"micro-warehouse/product-service/model"
+
+	"go.uber.org/mock/gomock"
 )
 
-type stubProductRepo struct {
-	products   map[uint]*model.Product
-	byBarcode  map[string]*model.Product
-	lastCreate *model.Product
-	lastUpdate *model.Product
-	err        error
-}
-
-func (s *stubProductRepo) CreateProduct(ctx context.Context, product *model.Product) error {
-	if s.err != nil {
-		return s.err
-	}
-	s.lastCreate = product
-	if s.products == nil {
-		s.products = map[uint]*model.Product{}
-	}
-	s.products[product.ID] = product
-	return nil
-}
-
-func (s *stubProductRepo) GetAllProducts(ctx context.Context, page, limit int, search, sortBy, sortOrder string) ([]model.Product, int64, error) {
-	if s.err != nil {
-		return nil, 0, s.err
-	}
-	var out []model.Product
-	for _, p := range s.products {
-		out = append(out, *p)
-	}
-	return out, int64(len(out)), nil
-}
-
-func (s *stubProductRepo) GetProductByID(ctx context.Context, id uint) (*model.Product, error) {
-	if s.err != nil {
-		return nil, s.err
-	}
-	p, ok := s.products[id]
-	if !ok {
-		return nil, errors.New("product not found")
-	}
-	return p, nil
-}
-
-func (s *stubProductRepo) GetProductByBarcode(ctx context.Context, barcode string) (*model.Product, error) {
-	if s.err != nil {
-		return nil, s.err
-	}
-	p, ok := s.byBarcode[barcode]
-	if !ok {
-		return nil, errors.New("barcode not found")
-	}
-	return p, nil
-}
-
-func (s *stubProductRepo) UpdateProduct(ctx context.Context, product *model.Product) error {
-	if s.err != nil {
-		return s.err
-	}
-	s.lastUpdate = product
-	return nil
-}
-
-func (s *stubProductRepo) DeleteProduct(ctx context.Context, id uint) error {
-	return s.err
-}
-
 func TestProductUsecase_CRUDAndBarcodeLookup(t *testing.T) {
-	p1 := &model.Product{ID: 10, Name: "Minyak Goreng 2L", Barcode: "8991002003004", Price: 36000}
-	repo := &stubProductRepo{
-		products:  map[uint]*model.Product{},
-		byBarcode: map[string]*model.Product{p1.Barcode: p1},
-	}
+	ctrl := gomock.NewController(t)
+	repo := mocks.NewMockProductRepositoryInterface(ctrl)
 	uc := NewProductUsecase(repo)
+
+	p1 := &model.Product{ID: 10, Name: "Minyak Goreng 2L", Barcode: "8991002003004", Price: 36000}
+
+	repo.EXPECT().CreateProduct(gomock.Any(), gomock.AssignableToTypeOf(&model.Product{})).
+		DoAndReturn(func(_ context.Context, product *model.Product) error {
+			if product.Name != "Minyak Goreng 2L" {
+				t.Fatalf("expected product name Minyak Goreng 2L, got %q", product.Name)
+			}
+			return nil
+		})
+	repo.EXPECT().GetProductByID(gomock.Any(), uint(10)).Return(p1, nil)
+	repo.EXPECT().GetProductByBarcode(gomock.Any(), p1.Barcode).Return(p1, nil)
+	repo.EXPECT().GetAllProducts(gomock.Any(), 1, 10, "", "id", "asc").Return([]model.Product{*p1}, int64(1), nil)
+	repo.EXPECT().UpdateProduct(gomock.Any(), gomock.AssignableToTypeOf(&model.Product{})).
+		DoAndReturn(func(_ context.Context, product *model.Product) error {
+			if product.Price != 38000 {
+				t.Fatalf("expected updated price 38000, got %v", product.Price)
+			}
+			return nil
+		})
 
 	if err := uc.CreateProduct(context.Background(), p1); err != nil {
 		t.Fatalf("CreateProduct failed: %v", err)
-	}
-	if repo.lastCreate == nil || repo.lastCreate.Name != "Minyak Goreng 2L" {
-		t.Fatalf("expected created product to be recorded, got %+v", repo.lastCreate)
 	}
 
 	gotByID, err := uc.GetProductByID(context.Background(), 10)
@@ -105,8 +57,5 @@ func TestProductUsecase_CRUDAndBarcodeLookup(t *testing.T) {
 	p1.Price = 38000
 	if err := uc.UpdateProduct(context.Background(), p1); err != nil {
 		t.Fatalf("UpdateProduct failed: %v", err)
-	}
-	if repo.lastUpdate == nil || repo.lastUpdate.Price != 38000 {
-		t.Fatalf("expected updated price 38000, got %+v", repo.lastUpdate)
 	}
 }

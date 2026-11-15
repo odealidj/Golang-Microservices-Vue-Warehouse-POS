@@ -113,13 +113,21 @@ func (s *StockConsumer) ConsumeStockReductionEvents(ctx context.Context) error {
 			log.Info("Stopping stock consumer...")
 			return nil
 		case msg := <-msgs:
-			go s.handleStockReductionEvent(msg)
+			go func(d amqp.Delivery) {
+				if err := s.handleStockReductionEvent(d); err != nil {
+					log.Errorf("[StockConsumer] handleStockReductionEvent error: %v", err)
+				}
+			}(msg)
 		}
 	}
 }
 
 func (sc *StockConsumer) handleStockReductionEvent(msg amqp.Delivery) error {
-	defer msg.Ack(false)
+	defer func() {
+		if err := msg.Ack(false); err != nil {
+			log.Errorf("[StockConsumer] Ack failed: %v", err)
+		}
+	}()
 
 	var event StockReducedEvent
 	if err := json.Unmarshal(msg.Body, &event); err != nil {

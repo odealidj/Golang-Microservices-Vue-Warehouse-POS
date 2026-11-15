@@ -11,6 +11,8 @@ import (
 // Detail warehouse, Get warehouse product by WarehouseID and ProductID,
 // Create warehouse product, update warehouse product, delete warehouse product
 // Delete All Product in Warehouse Product, Get Warehouse Product by ProductID, Get product total stock
+//go:generate mockgen -source=warehouse_product_repository.go -destination=../mocks/mock_warehouse_product_repository.go -package=mocks
+
 type WarehouseProductRepositoryInterface interface {
 	GetDetailWarehouse(ctx context.Context, warehouseID uint) (*model.Warehouse, error)
 	GetDetailWarehouseProductByID(ctx context.Context, warehouseProductID uint) (*model.WarehouseProduct, error)

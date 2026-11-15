@@ -1,7 +1,7 @@
 # FMCG Multi-Warehouse & Retail POS Platform
 
 [![CI](https://github.com/odealidj/Golang-Microservices-Vue-Warehouse-POS/actions/workflows/ci.yml/badge.svg)](https://github.com/odealidj/Golang-Microservices-Vue-Warehouse-POS/actions/workflows/ci.yml)
-![Go](https://img.shields.io/badge/Go-1.24%20/%201.26-00ADD8?logo=go&logoColor=white)
+![Go](https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white)
 ![Vue.js](https://img.shields.io/badge/Vue.js-3.5-4FC08D?logo=vuedotjs&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database%20per%20Service-4169E1?logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
@@ -89,7 +89,7 @@ flowchart LR
         GW["API Gateway (:8080)<br/>Fiber v2 + JWT Auth + Header Sanitizer<br/>+ Resilient Rate Limiter"]
     end
 
-    subgraph SERVICES["Domain Microservices (Go / Fiber + GORM)"]
+    subgraph SERVICES["Domain Microservices (Go 1.26 / Fiber + GORM)"]
         US["user-service (:8081)<br/>Auth, RBAC, Seeder"]
         PS["product-service (:8082)<br/>Katalog & Barcode"]
         WS["warehouse-service (:8083)<br/>Stok Gudang Pusat"]
@@ -168,7 +168,7 @@ flowchart LR
 | Layer | Teknologi & Library Utama | Peran |
 |---|---|---|
 | **Frontend** | Vue `3.5`, Vite `5`, Pinia `2`, Vue Router `4`, Tailwind CSS `3`, QuaggaJS (`quagga`), Node.js `node --test` | SPA Back-Office & Kasir POS, *state management*, scanner barcode kamera, UI Midtrans Snap, unit test store |
-| **Backend & Framework** | Go `1.24+` (`1.26` di branch quality), Fiber `v2`, GORM + `pgx/v5`, `golang-jwt/jwt/v5`, `cobra`, `viper`, `validator/v10`, `zerolog`, `bcrypt`, `gomail.v2` | 7 microservice modular (Clean Architecture: `controller` → `usecase` → `repository` → `model`) |
+| **Backend & Framework** | Go `1.26` (`api-gateway` `1.24`), Fiber `v2`, GORM + `pgx/v5`, `golang-jwt/jwt/v5`, `cobra`, `viper`, `validator/v10`, `zerolog`, `bcrypt`, `gomail.v2` | 7 microservice modular (Clean Architecture: `controller` → `usecase` → `repository` → `model`) |
 | **Data & Messaging** | PostgreSQL x6 (Database-per-Service), Redis (`go-redis/v9`), RabbitMQ (`streadway/amqp`) | Isolasi database tiap domain, rate limiting terdistribusi, *cache-aside*, event-driven stock & email |
 | **Integrasi Eksternal** | Midtrans Snap API & Webhook, Supabase Storage, SMTP Server | Pembayaran digital + verifikasi webhook, penyimpanan media, pengiriman email |
 | **Observability & Load Test** | Prometheus (`:9090`), Grafana (`:3001`, opsional), OpenTelemetry SDK + Jaeger (`:16686`), k6 | Metrik HTTP per route, distributed tracing `traceparent` / `X-Trace-ID`, uji beban bertahap *(pada branch fitur)* |
@@ -229,12 +229,12 @@ Selain `main` sebagai baseline platform inti, pengembangan lanjutan dipisahkan k
 .
 ├── backend/
 │   ├── api-gateway/            # Reverse proxy, JWT auth, rate limiter & gateway integration test
-│   ├── user-service/           # Auth, RBAC & auto-seeder (mocks GoMock di feat/go-quality-and-testing)
-│   ├── product-service/        # Master kategori/produk & barcode lookup
-│   ├── warehouse-service/      # Gudang pusat, stok gudang & RabbitMQ consumer
+│   ├── user-service/           # Auth, RBAC, seeder & mocks/
+│   ├── product-service/        # Master kategori/produk, barcode lookup & mocks/
+│   ├── warehouse-service/      # Gudang pusat, stok gudang, RabbitMQ consumer & mocks/
 │   ├── merchant-service/       # Outlet merchant, cache-aside Redis & RabbitMQ consumer
-│   ├── transaction-service/    # Checkout POS & Midtrans Snap/webhook
-│   ├── notification-service/   # Consumer email RabbitMQ + SMTP
+│   ├── transaction-service/    # Checkout POS, Midtrans Snap/webhook & mocks/
+│   ├── notification-service/   # Consumer email RabbitMQ + SMTP & mocks/
 │   ├── tests/integration/      # E2E integration test lintas service (build tag: integration)
 │   ├── pkg/observability/      # [Branch observability] Shared Prometheus metrics & OTel tracing
 │   ├── observability/          # [feat/metrics-prometheus] Config Prometheus & Grafana datasource
@@ -249,8 +249,9 @@ Selain `main` sebagai baseline platform inti, pengembangan lanjutan dipisahkan k
 │   ├── 04-erd-dan-data-model.md            # ERD 6 database PostgreSQL & relasi logis lintas service
 │   ├── 05-observability-dan-pengujian.md   # Panduan Metrics, Tracing, Load Testing, Quality & CI
 │   └── postman_collection.json             # Koleksi endpoint API untuk pengujian manual
-├── .github/workflows/ci.yml    # GitHub Actions CI (diperluas di feat/go-quality-and-testing)
-└── Makefile                    # Shortcut setup, Docker, testing & build
+├── .github/workflows/ci.yml    # GitHub Actions CI (-race, integration, vet, golangci-lint, govulncheck, gomock, compose, frontend)
+├── .golangci.yml               # Konfigurasi linter terpusat untuk semua microservice Go
+└── Makefile                    # Shortcut setup, Docker, testing, linting, govulncheck, mocks & build
 ```
 
 ---
@@ -259,7 +260,7 @@ Selain `main` sebagai baseline platform inti, pengembangan lanjutan dipisahkan k
 
 ### Prasyarat
 - Docker & Docker Compose
-- Go `1.24+` (`1.26+` untuk branch `feat/go-quality-and-testing`)
+- Go `1.26+` (opsional untuk test/lint/development lokal; atau `1.24+` di `main`)
 - Node.js `22+` (atau `20+`) & npm (untuk frontend)
 
 ### 1. Siapkan Environment Variables
@@ -301,23 +302,26 @@ Akses aplikasi melalui browser di `http://localhost:3000`.
 
 ## Pengujian, Quality Gate & CI/CD
 
-Menjalankan seluruh unit test Go (`go test`), static check (`go vet`), unit test frontend (`node --test` untuk Pinia store transaksi), dan build produksi frontend pada `main`:
+Menjalankan seluruh unit test Go (`go test -race`), static check (`go vet`), linter (`golangci-lint`), unit test frontend (`node --test` untuk Pinia store transaksi), dan build produksi frontend:
 ```bash
 make test
 ```
 Atau jalankan per bagian:
 ```bash
-make test-backend              # Unit test seluruh 7 service Go
+make test-backend              # Unit test seluruh 7 service Go dengan -race
 make vet-backend               # go vet seluruh 7 service Go
-make test-integration-gateway  # Integration test API Gateway (-tags=integration) tanpa Docker
+make lint-backend              # golangci-lint dengan .golangci.yml
+make vulncheck-backend         # Vulnerability scan dependensi & stdlib dengan govulncheck
+make generate-mocks            # Regenerasi mock GoMock (go generate ./...)
+make verify-mocks              # Pastikan mock di backend/*/mocks/ sinkron dengan interface
+make test-integration-gateway  # Integration test API Gateway (-tags=integration -race) tanpa Docker
 make test-frontend             # Unit test frontend (node --test)
 make build-frontend            # Build produksi Vite
 ```
-*(Perintah quality gate tambahan `make lint-backend`, `make vulncheck-backend`, `make generate-mocks`, `make verify-mocks`, dan test `-race` tersedia di branch `feat/go-quality-and-testing`.)*
 
 ### GitHub Actions CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml))
 
-Pada `main`, pipeline menjalankan test/vet Go (7 services) serta unit test & Vite build frontend. Pada branch **`feat/go-quality-and-testing`**, CI diperluas mencakup:
+Pipeline otomatis berjalan pada `push` (`main`, `master`, `feat/**`), `pull_request` (`main`, `master`), dan `workflow_dispatch`:
 - **Backend Matrix (`Go 1.26.x`, 7 services)**: `go test -race -v ./...`, `go test -tags=integration -race -v ./...` (`api-gateway`), `go vet ./...`, `golangci-lint` (`v1.64.8`), dan `govulncheck ./...`.
 - **GoMock Sync Check**: `make verify-mocks` memastikan file mock selalu sinkron dengan definisi interface.
 - **Docker Compose Config Check**: `make setup-env` dan `cd backend && docker compose config -q`.

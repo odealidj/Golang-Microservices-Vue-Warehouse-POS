@@ -14,6 +14,8 @@ import (
 	"github.com/gofiber/fiber/v2/log"
 )
 
+//go:generate mockgen -source=merchant_client.go -destination=../../mocks/mock_merchant_client.go -package=mocks
+
 type MerchantClientInterface interface {
 	GetMerchantsByKeeperID(ctx context.Context, keeperID uint) ([]Merchant, error)
 	GetMerchantByID(ctx context.Context, merchantID uint) (*Merchant, error)
