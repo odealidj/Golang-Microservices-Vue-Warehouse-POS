@@ -95,6 +95,8 @@ flowchart LR
 │   ├── merchant-service/
 │   ├── transaction-service/
 │   ├── notification-service/
+│   ├── pkg/observability/      # Shared Prometheus metrics middleware
+│   ├── observability/          # Konfigurasi Prometheus & Grafana datasource
 │   ├── tests/integration/      # E2E integration test lintas service (build tag: integration)
 │   └── docker-compose.yml
 ├── frontend/                   # Vue 3 + Vite + Pinia + Tailwind CSS + QuaggaJS
@@ -133,7 +135,11 @@ make build
 make up
 make ps
 ```
-API Gateway akan aktif di `http://localhost:8080` (`GET /health`) dan RabbitMQ Management UI di `http://localhost:15672` (`guest`/`guest`).
+API Gateway akan aktif di `http://localhost:8080` (`GET /health`, `GET /metrics`), RabbitMQ Management UI di `http://localhost:15672` (`guest`/`guest`), dan **Prometheus UI** di `http://localhost:9090`.
+*(Opsional)* Untuk menjalankan **Grafana** (`http://localhost:3001`, login `admin`/`admin`):
+```bash
+cd backend && docker compose --profile grafana up -d
+```
 
 Akun default hasil auto-seeder (`user-service`):
 - **Email**: `manager@mail.com`

@@ -103,7 +103,20 @@ func TestGatewayIntegration_HealthJWTHeaderSanitizationAndMidtransWebhook(t *tes
 		t.Fatalf("expected X-Gateway header, got %q", got)
 	}
 
-	// 4. Public Midtrans webhook route -> forwards without JWT
+	// 4. Public /metrics endpoint -> 200 with Prometheus metrics
+	metricsResp, err := app.Test(httptest.NewRequest(http.MethodGet, "/metrics", nil))
+	if err != nil {
+		t.Fatalf("metrics request failed: %v", err)
+	}
+	if metricsResp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200 on /metrics, got %d", metricsResp.StatusCode)
+	}
+	metricsBody, _ := io.ReadAll(metricsResp.Body)
+	if !strings.Contains(string(metricsBody), "http_requests_total") {
+		t.Fatalf("expected http_requests_total in /metrics output")
+	}
+
+	// 5. Public Midtrans webhook route -> forwards without JWT
 	webhookReq := httptest.NewRequest(http.MethodPost, "/api/v1/midtrans/callback", strings.NewReader(`{"order_id":"ORDER-1"}`))
 	webhookReq.Header.Set("Content-Type", "application/json")
 	webhookResp, err := app.Test(webhookReq)

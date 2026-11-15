@@ -20,6 +20,7 @@ import (
 	jwtConf "micro-warehouse/api-gateway/config"
 	"micro-warehouse/api-gateway/controller"
 	"micro-warehouse/api-gateway/middleware"
+	"micro-warehouse/observability"
 )
 
 var proxyHTTPClient = &http.Client{Timeout: 30 * time.Second}
@@ -98,6 +99,7 @@ func buildApp(config Config, jwtConfig middleware.JWTConfig, redisClient *redis.
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 		AllowMethods: "GET, POST, PUT, DELETE, OPTIONS",
 	}))
+	observability.RegisterMetrics(app, "api-gateway")
 
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{

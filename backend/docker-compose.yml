@@ -137,14 +137,38 @@ services:
       timeout: 5s
       retries: 3
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: warehouse_prometheus
+    restart: unless-stopped
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: warehouse_grafana
+    profiles: ["grafana"]
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./observability/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+
   user-service:
     build:
-        context: ./user-service
-        dockerfile: Dockerfile
+      context: .
+      dockerfile: user-service/Dockerfile
     env_file:
-        - ./user-service/.env
+      - ./user-service/.env
     ports:
-        - "8081:8081"
+      - "8081:8081"
     depends_on:
       user_db:
         condition: service_healthy
@@ -161,8 +185,8 @@ services:
     
   product-service:
     build:
-      context: ./product-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: product-service/Dockerfile
     env_file:
       - ./product-service/.env
     ports:
@@ -183,8 +207,8 @@ services:
 
   transaction-service:
     build:
-      context: ./transaction-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: transaction-service/Dockerfile
     env_file:
       - ./transaction-service/.env
     ports:
@@ -209,8 +233,8 @@ services:
 
   warehouse-service:
     build:
-      context: ./warehouse-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: warehouse-service/Dockerfile
     env_file:
       - ./warehouse-service/.env
     ports:
@@ -233,8 +257,8 @@ services:
 
   merchant-service:
     build:
-      context: ./merchant-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: merchant-service/Dockerfile
     env_file:
       - ./merchant-service/.env
     ports:
@@ -259,8 +283,8 @@ services:
 
   notification-service:
     build:
-      context: ./notification-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: notification-service/Dockerfile
     env_file:
       - ./notification-service/.env
     ports:
@@ -281,8 +305,8 @@ services:
       
   api-gateway:
     build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: api-gateway/Dockerfile
     container_name: warehouse_api_gateway
     env_file:
       - ./api-gateway/.env

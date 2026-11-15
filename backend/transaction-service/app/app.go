@@ -1,6 +1,7 @@
 package app
 
 import (
+	"micro-warehouse/observability"
 	"micro-warehouse/transaction-service/configs"
 
 	"context"
@@ -36,6 +37,7 @@ func RunServer() {
 	app.Use(logger.New(logger.Config{
 		Format: "[${time}] $ip ${status} - ${latency}  ${method}  ${path}\n",
 	}))
+	observability.RegisterMetrics(app, "transaction-service")
 
 	app.Use(middlewareGateway.GatewayAuth())
 

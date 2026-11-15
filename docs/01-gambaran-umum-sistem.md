@@ -7,7 +7,7 @@
 ### Aktor Pengguna
 
 | Aktor | Peran Sistem | Lingkup Operasional |
-|---|---|---|
+| --- | --- | --- |
 | **Manager** | `Manager` (Back-Office) | Mengelola master kategori & produk ber-barcode, gudang & stok pusat, outlet merchant, alokasi stok dari gudang ke merchant, serta manajemen user & role. |
 | **Keeper** | `Keeper` (Front-Office / Kasir) | Mengelola stok pada outlet yang ditugaskan kepadanya, menjalankan kasir POS 3 langkah (pelanggan, scan barcode/keranjang, pembayaran Midtrans), dan memantau omzet outlet. |
 | **Pelanggan** | Eksternal | Melakukan pembelian di outlet dan menyelesaikan pembayaran digital melalui Snap Midtrans (QRIS/VA/e-wallet). |
@@ -53,6 +53,13 @@ flowchart LR
     WS --> SUP
     MS --> SUP
     NS --> SMTP["SMTP Server"]
+
+    GW -.->|"GET /metrics"| PROM["Prometheus (9090)"]
+
+    GW -.->|"OTLP Trace"| JAEGER["Jaeger UI (16686)"]
+    GW -.->|"GET /metrics"| PROM["Prometheus (9090)"]
+
+    GW -.->|"GET /metrics"| PROM["Prometheus (9090)"]
 ```
 
 ---
@@ -60,7 +67,7 @@ flowchart LR
 ## 1.3 Katalog Microservices
 
 | Service | Port | Database PostgreSQL | Tanggung Jawab Utama |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `api-gateway` | `8080` | - | Entry point tunggal, reverse proxy, verifikasi JWT, sanitasi header internal, dan rate limiting (Redis dengan fallback in-memory). |
 | `user-service` | `8081` | `warehouse_user_db` (`:5432`) | Manajemen user, role, RBAC (`Manager`, `Keeper`), auto-seeder akun awal, upload avatar, dan publish email selamat datang. |
 | `product-service` | `8082` | `warehouse_product_db` (`:5433`) | Master katalog kategori & produk, lookup barcode unik, dan upload gambar produk/kategori ke Supabase Storage. |
@@ -78,3 +85,4 @@ flowchart LR
 3. **Authoritative Server-Side Pricing**: Nominal transaksi (`Price`, `SubTotal`, `TaxTotal` PPN 11%, `GrandTotal`) selalu dihitung ulang di `transaction-service` berdasarkan harga master dari `product-service`, bukan mempercayai harga dari payload frontend.
 4. **Resilient Rate Limiting**: `api-gateway` memakai Redis rate limiter untuk skala terdistribusi dan otomatis beralih (*graceful fallback*) ke in-memory rate limiter jika Redis tidak dapat dijangkau.
 5. **Clean Architecture per Service**: Struktur kode seragam di seluruh backend (`controller` → `usecase` → `repository` → `model`) dengan perakitan dependensi di `app/container.go`.
+6. **Observability Terintegrasi**: Seluruh 7 service Go menggunakan modul bersama [`backend/pkg/observability`](file:///home/aliube/Workspace/BWA/Gemini/Go/Warehouse-Golang-VueJs-2025/backend/pkg/observability/observability.go) untuk mengekspor metrics Prometheus (`http_requests_total`, `http_request_duration_seconds`) di `/metrics` serta distributed tracing OpenTelemetry (OTLP HTTP ke Jaeger dengan propagasi W3C `traceparent`).

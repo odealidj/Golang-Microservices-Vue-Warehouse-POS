@@ -1,6 +1,6 @@
 .PHONY: help setup-env build up down logs ps test-backend vet-backend test-integration-gateway test-integration test-frontend build-frontend dev-frontend test
 
-SERVICES := api-gateway merchant-service notification-service product-service transaction-service user-service warehouse-service
+SERVICES := api-gateway merchant-service notification-service product-service transaction-service user-service warehouse-service pkg/observability
 
 help:
 	@echo "FMCG Multi-Warehouse & POS Platform - Available Commands:"

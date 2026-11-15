@@ -143,6 +143,7 @@ sequenceDiagram
 | Prefix Path | Autentikasi | Rate Limit | Service Tujuan |
 |---|---|---|---|
 | `GET /health` | Publik | Global | Internal API Gateway |
+| `GET /metrics` | Publik | Global | Prometheus Metrics (API Gateway & tiap service) |
 | `POST /api/v1/auth/login` | Publik | Auth (`10 req/min`) | `user-service` (`:8081`) |
 | `POST /api/v1/midtrans/callback` | Publik (verifikasi SHA512 di service) | Global | `transaction-service` (`:8085`) |
 | `/api/v1/users*`, `/api/v1/roles*`, `/api/v1/assign-role*`, `/api/v1/upload*` | JWT Protected | API (`100 req/min`) | `user-service` (`:8081`) |
