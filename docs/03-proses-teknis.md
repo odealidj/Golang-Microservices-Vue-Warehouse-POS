@@ -143,7 +143,7 @@ sequenceDiagram
 | Prefix Path | Autentikasi | Rate Limit | Service Tujuan |
 |---|---|---|---|
 | `GET /health` | Publik | Global | Internal API Gateway |
-| `GET /metrics` *(branch `feat/metrics-prometheus`)* | Publik | Global | Prometheus Metrics (API Gateway & tiap service) |
+| `GET /metrics` | Publik | Global | Prometheus Metrics (API Gateway & tiap service) |
 | `POST /api/v1/auth/login` | Publik | Auth (`10 req/min`) | `user-service` (`:8081`) |
 | `POST /api/v1/midtrans/callback` | Publik (verifikasi SHA512 di service) | Global | `transaction-service` (`:8085`) |
 | `/api/v1/users*`, `/api/v1/roles*`, `/api/v1/assign-role*`, `/api/v1/upload*` | JWT Protected | API (`100 req/min`) | `user-service` (`:8081`) |
@@ -154,7 +154,7 @@ sequenceDiagram
 
 ---
 
-## 3.7 Alur Distributed Tracing Lintas Service *(branch `feat/distributed-tracing`)*
+## 3.7 Alur Distributed Tracing Lintas Service
 
 ```mermaid
 sequenceDiagram
@@ -182,7 +182,7 @@ sequenceDiagram
 
 ---
 
-## 3.8 Alur Scraping Metrics Prometheus *(branch `feat/metrics-prometheus`)*
+## 3.8 Alur Scraping Metrics Prometheus
 
 ```mermaid
 flowchart LR

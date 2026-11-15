@@ -52,6 +52,7 @@ func TestTracingMiddleware_PropagatesTraceContext(t *testing.T) {
 	if err != nil {
 		t.Fatalf("/ping failed: %v", err)
 	}
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != fiber.StatusOK {
 		t.Fatalf("expected 200 on /ping, got %d", resp.StatusCode)
 	}
@@ -86,7 +87,7 @@ func TestTracedHTTPClient_InjectsTraceparentHeader(t *testing.T) {
 	if err != nil {
 		t.Fatalf("client.Do failed: %v", err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	if gotTraceparent == "" {
 		t.Fatal("expected Traceparent header to be propagated to downstream server")

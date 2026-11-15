@@ -27,7 +27,7 @@ help:
 
 setup-env:
 	@for svc in $(SERVICES); do \
-		if [ ! -f backend/$$svc/.env ]; then \
+		if [ -f backend/$$svc/env.example ] && [ ! -f backend/$$svc/.env ]; then \
 			cp backend/$$svc/env.example backend/$$svc/.env && echo "Created backend/$$svc/.env"; \
 		fi; \
 	done
@@ -65,7 +65,7 @@ vet-backend:
 lint-backend:
 	@for svc in $(SERVICES); do \
 		echo "=== Linting $$svc ==="; \
-		(cd backend/$$svc && golangci-lint run --config ../../.golangci.yml ./...) || exit 1; \
+		(cd backend/$$svc && golangci-lint run --config $(CURDIR)/.golangci.yml ./...) || exit 1; \
 	done
 
 vulncheck-backend:

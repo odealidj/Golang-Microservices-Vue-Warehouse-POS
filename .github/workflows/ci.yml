@@ -54,7 +54,7 @@ jobs:
         with:
           version: v1.64.8
           working-directory: backend/${{ matrix.service }}
-          args: --config=../../.golangci.yml ./...
+          args: --config=${{ github.workspace }}/.golangci.yml ./...
 
       - name: Run govulncheck
         working-directory: backend/${{ matrix.service }}

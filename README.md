@@ -56,11 +56,11 @@ flowchart TB
     SUP["Supabase Storage<br/>(Object Storage Media/Avatar/Produk)"]
     SMTP["SMTP Mail Server<br/>(Pengiriman Email Notifikasi)"]
 
-    subgraph OPS["Observability & Quality Tooling (Per Branch Fitur)"]
+    subgraph OPS["Observability & Load Testing (Terintegrasi di main)"]
         direction LR
-        PROM["Prometheus & Grafana<br/>(feat/metrics-prometheus)"]
-        JAEGER["Jaeger OTLP Tracing<br/>(feat/distributed-tracing)"]
-        K6["k6 Load Tester<br/>(feat/load-testing)"]
+        PROM["Prometheus & Grafana Opsional<br/>(juga di feat/metrics-prometheus)"]
+        JAEGER["Jaeger OTLP Tracing<br/>(juga di feat/distributed-tracing)"]
+        K6["k6 Load Tester<br/>(juga di feat/load-testing)"]
     end
 
     MGR -->|"Kelola Produk, Gudang, Merchant & User (HTTPS/JWT)"| SYS
@@ -115,7 +115,7 @@ flowchart LR
         SMTP["SMTP Server"]
     end
 
-    subgraph OBS["Observability (Branch Fitur)"]
+    subgraph OBS["Observability Stack"]
         PROM["Prometheus (:9090)<br/>+ Grafana Opsional (:3001)"]
         JAEGER["Jaeger UI (:16686)<br/>OTLP HTTP (:4318)"]
     end
@@ -168,10 +168,10 @@ flowchart LR
 | Layer | Teknologi & Library Utama | Peran |
 |---|---|---|
 | **Frontend** | Vue `3.5`, Vite `5`, Pinia `2`, Vue Router `4`, Tailwind CSS `3`, QuaggaJS (`quagga`), Node.js `node --test` | SPA Back-Office & Kasir POS, *state management*, scanner barcode kamera, UI Midtrans Snap, unit test store |
-| **Backend & Framework** | Go `1.26` (`api-gateway` `1.24`), Fiber `v2`, GORM + `pgx/v5`, `golang-jwt/jwt/v5`, `cobra`, `viper`, `validator/v10`, `zerolog`, `bcrypt`, `gomail.v2` | 7 microservice modular (Clean Architecture: `controller` → `usecase` → `repository` → `model`) |
+| **Backend & Framework** | Go `1.26`, Fiber `v2`, GORM + `pgx/v5`, `golang-jwt/jwt/v5`, `cobra`, `viper`, `validator/v10`, `zerolog`, `bcrypt`, `gomail.v2` | 7 microservice modular (Clean Architecture: `controller` → `usecase` → `repository` → `model`) |
 | **Data & Messaging** | PostgreSQL x6 (Database-per-Service), Redis (`go-redis/v9`), RabbitMQ (`streadway/amqp`) | Isolasi database tiap domain, rate limiting terdistribusi, *cache-aside*, event-driven stock & email |
 | **Integrasi Eksternal** | Midtrans Snap API & Webhook, Supabase Storage, SMTP Server | Pembayaran digital + verifikasi webhook, penyimpanan media, pengiriman email |
-| **Observability & Load Test** | Prometheus (`:9090`), Grafana (`:3001`, opsional), OpenTelemetry SDK + Jaeger (`:16686`), k6 | Metrik HTTP per route, distributed tracing `traceparent` / `X-Trace-ID`, uji beban bertahap *(pada branch fitur)* |
+| **Observability & Load Test** | Prometheus (`:9090`), Grafana (`:3001`, opsional), OpenTelemetry SDK + Jaeger (`:16686`), k6 | Metrik HTTP per route, distributed tracing `traceparent` / `X-Trace-ID`, uji beban bertahap |
 | **Quality, Security & CI/CD** | Docker Compose, GitHub Actions, `golangci-lint` (`v1.64.8`), `govulncheck`, Go `-race`, GoMock (`go.uber.org/mock` + `mockgen`) | Automated unit & integration tests, race detector, interface mocking, lint gate, CVE scan, validasi Compose |
 
 ---
@@ -205,21 +205,21 @@ flowchart LR
 - **Verified Payment Webhooks**: Callback Midtrans memverifikasi `signature_key` menggunakan `SHA512(order_id + status_code + gross_amount + server_key)` dengan perbandingan *constant-time*.
 - **Event-Driven Stock Choreography & Privacy-Safe Messaging**: Pengurangan stok gudang dan outlet ter-decouple via RabbitMQ topic exchange, serta pesan email ke broker tidak menyertakan plaintext password.
 - **Clean Architecture Konsisten**: Setiap service memisahkan `controller` → `usecase` → `repository` → `model` dengan wiring dependensi di `app/container.go`, konfigurasi `viper`, dan entrypoint `cobra`.
-- **Quality, Security & Observability Modular**: Dilengkapi race detector (`go test -race`), **GoMock** (`mockgen`), `golangci-lint`, `govulncheck`, GitHub Actions CI, serta branch terpisah untuk **Prometheus/Grafana**, **OpenTelemetry/Jaeger**, dan **k6 load testing** ([`docs/05-observability-dan-pengujian.md`](docs/05-observability-dan-pengujian.md)).
+- **Quality, Security & Observability Lengkap**: Dilengkapi race detector (`go test -race`), **GoMock** (`mockgen`), `golangci-lint`, `govulncheck`, GitHub Actions CI, serta **Prometheus/Grafana opsional**, **OpenTelemetry/Jaeger**, dan **k6 load testing** terintegrasi di `main` ([`docs/05-observability-dan-pengujian.md`](docs/05-observability-dan-pengujian.md)).
 
 ---
 
 ## Branch Fitur
 
-Selain `main` sebagai baseline platform inti, pengembangan lanjutan dipisahkan ke **4 branch fitur independen** agar mudah di-review dan di-merge secara modular:
+Seluruh fitur di bawah telah digabungkan (**merged**) ke `main`, sementara keempat branch fitur tetap dipertahankan utuh secara independen apabila ingin meninjau atau menguji masing-masing fitur secara terisolasi:
 
 | Branch | Fokus Fitur | Artefak Utama |
 |---|---|---|
-| `main` | Core Platform | 7 microservices Go, Vue 3 SPA, unit & integration test, Docker Compose, GitHub Actions CI, `docs/` |
-| `feat/metrics-prometheus` | Metrics & Monitoring | `backend/pkg/observability/metrics.go` (`GET /metrics`), Prometheus (`:9090`), Grafana opsional (`:3001` via `--profile grafana`) |
-| `feat/distributed-tracing` | Distributed Tracing | `backend/pkg/observability/tracing.go` (`InitTracing`, `TracingMiddleware`, `NewTracedHTTPClient`, `X-Trace-ID`), Jaeger UI (`:16686`) |
-| `feat/load-testing` | Load Testing | Skrip k6 `backend/tests/load/smoke_and_pos.js` & target `make load-test` |
-| `feat/go-quality-and-testing` | Quality, Security & CI/CD | `.golangci.yml`, `govulncheck`, `go test -race`, GoMock (`backend/*/mocks/`), serta CI matrix lengkap ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) |
+| `main` | Platform Terintegrasi Penuh | Core platform + seluruh fitur observability, load testing, & quality gate |
+| `feat/metrics-prometheus` | Metrics & Monitoring (Terisolasi) | `backend/pkg/observability/metrics.go` (`GET /metrics`), Prometheus (`:9090`), Grafana opsional (`:3001` via `--profile grafana`) |
+| `feat/distributed-tracing` | Distributed Tracing (Terisolasi) | `backend/pkg/observability/tracing.go` (`InitTracing`, `TracingMiddleware`, `NewTracedHTTPClient`, `X-Trace-ID`), Jaeger UI (`:16686`) |
+| `feat/load-testing` | Load Testing (Terisolasi) | Skrip k6 `backend/tests/load/smoke_and_pos.js` & target `make load-test` |
+| `feat/go-quality-and-testing` | Quality, Security & CI/CD (Terisolasi) | `.golangci.yml`, `govulncheck`, `go test -race`, GoMock (`backend/*/mocks/`), serta CI matrix lengkap ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) |
 
 ---
 
@@ -236,9 +236,9 @@ Selain `main` sebagai baseline platform inti, pengembangan lanjutan dipisahkan k
 │   ├── transaction-service/    # Checkout POS, Midtrans Snap/webhook & mocks/
 │   ├── notification-service/   # Consumer email RabbitMQ + SMTP & mocks/
 │   ├── tests/integration/      # E2E integration test lintas service (build tag: integration)
-│   ├── pkg/observability/      # [Branch observability] Shared Prometheus metrics & OTel tracing
-│   ├── observability/          # [feat/metrics-prometheus] Config Prometheus & Grafana datasource
-│   ├── tests/load/             # [feat/load-testing] Skrip load testing k6
+│   ├── pkg/observability/      # Shared Prometheus metrics & OpenTelemetry tracing
+│   ├── observability/          # Konfigurasi Prometheus & provisioning Grafana datasource
+│   ├── tests/load/             # Skrip load testing k6
 │   └── docker-compose.yml      # PostgreSQL x6, Redis, RabbitMQ & 7 Go services
 ├── frontend/                   # Vue 3 + Vite + Pinia + Tailwind CSS + QuaggaJS + node:test
 ├── docs/
@@ -260,7 +260,7 @@ Selain `main` sebagai baseline platform inti, pengembangan lanjutan dipisahkan k
 
 ### Prasyarat
 - Docker & Docker Compose
-- Go `1.26+` (opsional untuk test/lint/development lokal; atau `1.24+` di `main`)
+- Go `1.26+` (opsional untuk test/lint/development lokal)
 - Node.js `22+` (atau `20+`) & npm (untuk frontend)
 
 ### 1. Siapkan Environment Variables
@@ -279,9 +279,10 @@ make up
 make ps
 ```
 Endpoint lokal yang aktif:
-- **API Gateway**: `http://localhost:8080` (`GET /health`)
+- **API Gateway**: `http://localhost:8080` (`GET /health`, `GET /metrics`)
 - **RabbitMQ Management UI**: `http://localhost:15672` (`guest` / `guest`)
-- *(Branch observability terpisah)*: **Prometheus** `:9090`, **Grafana opsional** `:3001`, **Jaeger UI** `:16686`.
+- **Prometheus**: `http://localhost:9090` (opsional Grafana via `cd backend && docker compose --profile grafana up -d` di `http://localhost:3001`, `admin`/`admin`)
+- **Jaeger UI (Distributed Tracing)**: `http://localhost:16686` (OTLP collector `:4317` / `:4318`)
 
 Akun default hasil auto-seeder (`user-service`) untuk pengembangan lokal:
 - **Email**: `manager@mail.com`
@@ -322,7 +323,7 @@ make build-frontend            # Build produksi Vite
 ### GitHub Actions CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml))
 
 Pipeline otomatis berjalan pada `push` (`main`, `master`, `feat/**`), `pull_request` (`main`, `master`), dan `workflow_dispatch`:
-- **Backend Matrix (`Go 1.26.x`, 7 services)**: `go test -race -v ./...`, `go test -tags=integration -race -v ./...` (`api-gateway`), `go vet ./...`, `golangci-lint` (`v1.64.8`), dan `govulncheck ./...`.
+- **Backend Matrix (`Go 1.26.x`, 7 services + `pkg/observability`)**: `go test -race -v ./...`, `go test -tags=integration -race -v ./...` (`api-gateway`), `go vet ./...`, `golangci-lint` (`v1.64.8`), dan `govulncheck ./...`.
 - **GoMock Sync Check**: `make verify-mocks` memastikan file mock selalu sinkron dengan definisi interface.
 - **Docker Compose Config Check**: `make setup-env` dan `cd backend && docker compose config -q`.
 - **Vue 3 Frontend (`Node 22`)**: `npm ci`, `npm test`, dan `npm run build`.
@@ -340,23 +341,20 @@ Integration test dipisahkan dengan build tag `//go:build integration` agar `make
   ```
   Opsional: atur `API_GATEWAY_URL` (default `http://localhost:8080`) atau `MIDTRANS_SERVER_KEY` untuk ikut memverifikasi signature callback Midtrans.
 
-### Observability & Load Testing (Per Branch)
+### Observability & Load Testing
 
-Detail lengkap tersedia di [`docs/05-observability-dan-pengujian.md`](docs/05-observability-dan-pengujian.md).
+Detail lengkap tersedia di [`docs/05-observability-dan-pengujian.md`](docs/05-observability-dan-pengujian.md). Seluruh komponen berikut aktif langsung di `main` (dan tetap tersedia terisolasi di masing-masing branch fitur):
 
-- **Metrics Prometheus (`feat/metrics-prometheus`)**:
+- **Metrics Prometheus & Grafana Opsional**:
   ```bash
-  git checkout feat/metrics-prometheus
   make up                                               # Prometheus aktif di http://localhost:9090
   cd backend && docker compose --profile grafana up -d  # Opsional: Grafana di http://localhost:3001 (admin/admin)
   ```
-- **Distributed Tracing OpenTelemetry + Jaeger (`feat/distributed-tracing`)**:
+- **Distributed Tracing OpenTelemetry + Jaeger**:
   ```bash
-  git checkout feat/distributed-tracing
   make up   # Jaeger UI aktif di http://localhost:16686 (OTLP HTTP :4318)
   ```
-- **Load Testing k6 (`feat/load-testing`)**:
+- **Load Testing k6**:
   ```bash
-  git checkout feat/load-testing
   make up && make load-test
   ```

@@ -21,6 +21,7 @@ func TestRegisterMetrics_ExposesPrometheusMetrics(t *testing.T) {
 	if err != nil {
 		t.Fatalf("/ping failed: %v", err)
 	}
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != fiber.StatusOK {
 		t.Fatalf("expected 200 on /ping, got %d", resp.StatusCode)
 	}
@@ -29,6 +30,7 @@ func TestRegisterMetrics_ExposesPrometheusMetrics(t *testing.T) {
 	if err != nil {
 		t.Fatalf("/metrics failed: %v", err)
 	}
+	defer func() { _ = metricsResp.Body.Close() }()
 	body, _ := io.ReadAll(metricsResp.Body)
 	text := string(body)
 	if !strings.Contains(text, `http_requests_total{method="GET",path="/ping",service="metrics-test-service",status="200"}`) {
