@@ -115,7 +115,7 @@ func (t *transactionController) CreateTransaction(ctx *fiber.Ctx) error {
 
 // GetDashboardByMerchant implements TransactionControllerInterface.
 func (t *transactionController) GetDashboardByMerchant(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 
 	merchantIDStr := c.Params("merchant_id")
 	merchantID := conv.StringToUint(merchantIDStr)
@@ -150,7 +150,7 @@ func (t *transactionController) GetDashboardByMerchant(c *fiber.Ctx) error {
 
 // GetManagerDashboard implements TransactionControllerInterface.
 func (t *transactionController) GetManagerDashboard(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 	userIDStr := c.Query("user_id")
 	userID := conv.StringToUint(userIDStr)
 
@@ -176,7 +176,7 @@ func (t *transactionController) GetManagerDashboard(c *fiber.Ctx) error {
 
 // GetTransactions implements TransactionControllerInterface.
 func (t *transactionController) GetTransactions(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 
 	query := request.GetAllTransactionRequest{}
 	if err := c.QueryParser(&query); err != nil {
@@ -265,7 +265,7 @@ func (t *transactionController) GetTransactions(c *fiber.Ctx) error {
 
 // GetTransactionByID implements TransactionControllerInterface.
 func (t *transactionController) GetTransactionByID(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 
 	idStr := c.Params("id")
 	id := conv.StringToUint(idStr)
@@ -335,7 +335,7 @@ func (t *transactionController) GetTransactionByID(c *fiber.Ctx) error {
 
 // MidtransCallback implements TransactionControllerInterface.
 func (t *transactionController) MidtransCallback(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 
 	req := request.MidtransCallbackRequest{}
 	if err := c.BodyParser(&req); err != nil {

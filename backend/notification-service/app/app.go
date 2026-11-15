@@ -5,6 +5,7 @@ import (
 	"micro-warehouse/notificaiton-service/configs"
 	"micro-warehouse/notificaiton-service/pkg/email"
 	"micro-warehouse/notificaiton-service/pkg/rabbitmq"
+	"micro-warehouse/observability"
 	"os"
 	"os/signal"
 	"syscall"
@@ -54,6 +55,18 @@ func RunServer() {
 	app.Use(logger.New(logger.Config{
 		Format: "[${time}] ${ip} ${status} - ${latency} ${method} ${path}\n",
 	}))
+
+	shutdownTracing, err := observability.InitTracing(context.Background(), "notification-service")
+	if err != nil {
+		log.Warnf("Failed to initialize tracing: %v", err)
+	} else {
+		defer func() {
+			shutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			_ = shutdownTracing(shutCtx)
+		}()
+	}
+	app.Use(observability.TracingMiddleware("notification-service"))
 
 	app.Use(middlewareGateway.GatewayAuth())
 

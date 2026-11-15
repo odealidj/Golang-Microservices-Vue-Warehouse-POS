@@ -28,7 +28,7 @@ func (u *uploadController) UploadMerchantPhoto(c *fiber.Ctx) error {
 	}
 
 	// Upload to Supabase using FileUploadHelper
-	result, err := u.fileUploadHelper.UploadPhoto(c.Context(), file)
+	result, err := u.fileUploadHelper.UploadPhoto(c.UserContext(), file)
 	if err != nil {
 		log.Errorf("[UploadController] UploadMerchantPhoto - 5: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

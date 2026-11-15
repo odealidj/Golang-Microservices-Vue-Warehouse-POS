@@ -2,12 +2,16 @@ FROM golang:1.24.3-alpine AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY pkg/observability ./pkg/observability
+COPY warehouse-service/go.mod warehouse-service/go.sum ./warehouse-service/
 
+WORKDIR /app/warehouse-service
 RUN go mod download && go mod verify
 
-COPY . .
+WORKDIR /app
+COPY warehouse-service ./warehouse-service
 
+WORKDIR /app/warehouse-service
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
 FROM alpine:latest
@@ -16,8 +20,8 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
-COPY --from=builder /app/main .
+COPY --from=builder /app/warehouse-service/main .
 
-EXPOSE 8081
+EXPOSE 8083
 
 CMD ["./main"]

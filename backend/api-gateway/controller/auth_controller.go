@@ -2,11 +2,13 @@ package controller
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"micro-warehouse/api-gateway/middleware"
+	"micro-warehouse/observability"
 	"net/http"
 	"time"
 
@@ -70,7 +72,7 @@ func (a *AuthController) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	loginResp, err := a.forwardLoginRequest(loginRequest)
+	loginResp, err := a.forwardLoginRequest(c.UserContext(), loginRequest)
 	if err != nil {
 		if errors.Is(err, errInvalidCredentials) {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -110,13 +112,13 @@ func (a *AuthController) Login(c *fiber.Ctx) error {
 	})
 }
 
-func (ac *AuthController) forwardLoginRequest(loginReq LoginRequest) (*LoginResponse, error) {
+func (ac *AuthController) forwardLoginRequest(ctx context.Context, loginReq LoginRequest) (*LoginResponse, error) {
 	reqBody, err := json.Marshal(loginReq)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", ac.userServiceURL+"/api/v1/auth/login", bytes.NewBuffer(reqBody))
+	req, err := http.NewRequestWithContext(ctx, "POST", ac.userServiceURL+"/api/v1/auth/login", bytes.NewBuffer(reqBody))
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +127,7 @@ func (ac *AuthController) forwardLoginRequest(loginReq LoginRequest) (*LoginResp
 	req.Header.Set("X-Gateway", "warehouse-api-gateway")
 	req.Header.Set("X-Internal-Request", "true")
 
-	client := &http.Client{Timeout: 15 * time.Second}
+	client := observability.NewTracedHTTPClient(15 * time.Second)
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err

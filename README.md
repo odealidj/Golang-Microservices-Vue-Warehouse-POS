@@ -95,6 +95,7 @@ flowchart LR
 │   ├── merchant-service/
 │   ├── transaction-service/
 │   ├── notification-service/
+│   ├── pkg/observability/      # Shared OpenTelemetry distributed tracing & W3C propagation
 │   ├── tests/integration/      # E2E integration test lintas service (build tag: integration)
 │   └── docker-compose.yml
 ├── frontend/                   # Vue 3 + Vite + Pinia + Tailwind CSS + QuaggaJS
@@ -133,7 +134,7 @@ make build
 make up
 make ps
 ```
-API Gateway akan aktif di `http://localhost:8080` (`GET /health`) dan RabbitMQ Management UI di `http://localhost:15672` (`guest`/`guest`).
+API Gateway akan aktif di `http://localhost:8080` (`GET /health`), RabbitMQ Management UI di `http://localhost:15672` (`guest`/`guest`), dan **Jaeger UI** di `http://localhost:16686` untuk melihat trace end-to-end lintas service.
 
 Akun default hasil auto-seeder (`user-service`):
 - **Email**: `manager@mail.com`

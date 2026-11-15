@@ -26,7 +26,7 @@ type roleController struct {
 
 // CreateRole implements RoleControllerInterface.
 func (r *roleController) CreateRole(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 
 	req := request.CreateRoleRequest{}
 	if err := c.BodyParser(&req); err != nil {
@@ -61,7 +61,7 @@ func (r *roleController) CreateRole(c *fiber.Ctx) error {
 
 // DeleteRole implements RoleControllerInterface.
 func (r *roleController) DeleteRole(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 
 	roleID := c.Params("id")
 	if roleID == "" {
@@ -86,7 +86,7 @@ func (r *roleController) DeleteRole(c *fiber.Ctx) error {
 
 // GetAllRoles implements RoleControllerInterface.
 func (r *roleController) GetAllRoles(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 
 	roles, err := r.roleUsecase.GetAllRoles(ctx)
 	if err != nil {
@@ -113,7 +113,7 @@ func (r *roleController) GetAllRoles(c *fiber.Ctx) error {
 
 // GetRoleByID implements RoleControllerInterface.
 func (r *roleController) GetRoleByID(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 
 	roleID := c.Params("id")
 	if roleID == "" {
@@ -140,7 +140,7 @@ func (r *roleController) GetRoleByID(c *fiber.Ctx) error {
 
 // UpdateRole implements RoleControllerInterface.
 func (r *roleController) UpdateRole(c *fiber.Ctx) error {
-	ctx := c.Context()
+	ctx := c.UserContext()
 
 	req := request.CreateRoleRequest{}
 	if err := c.BodyParser(&req); err != nil {

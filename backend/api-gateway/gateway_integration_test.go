@@ -3,6 +3,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"micro-warehouse/api-gateway/middleware"
@@ -11,6 +12,10 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 func newTestGatewayConfig(upstreamURL string) Config {
@@ -32,6 +37,20 @@ func newTestGatewayConfig(upstreamURL string) Config {
 }
 
 func TestGatewayIntegration_HealthJWTHeaderSanitizationAndMidtransWebhook(t *testing.T) {
+	tp := sdktrace.NewTracerProvider()
+	prevTP := otel.GetTracerProvider()
+	prevProp := otel.GetTextMapPropagator()
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
+	defer func() {
+		otel.SetTracerProvider(prevTP)
+		otel.SetTextMapPropagator(prevProp)
+		_ = tp.Shutdown(context.Background())
+	}()
+
 	var capturedHeaders http.Header
 	var capturedPath string
 
@@ -101,6 +120,12 @@ func TestGatewayIntegration_HealthJWTHeaderSanitizationAndMidtransWebhook(t *tes
 	}
 	if got := capturedHeaders.Get("X-Gateway"); got != "warehouse-api-gateway" {
 		t.Fatalf("expected X-Gateway header, got %q", got)
+	}
+	if authResp.Header.Get("X-Trace-ID") == "" {
+		t.Fatal("expected X-Trace-ID header on response")
+	}
+	if capturedHeaders.Get("Traceparent") == "" {
+		t.Fatal("expected Traceparent header to be propagated to upstream service")
 	}
 
 	// 4. Public Midtrans webhook route -> forwards without JWT

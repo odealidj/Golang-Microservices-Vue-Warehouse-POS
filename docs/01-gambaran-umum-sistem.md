@@ -53,6 +53,8 @@ flowchart LR
     WS --> SUP
     MS --> SUP
     NS --> SMTP["SMTP Server"]
+
+    GW -.->|"OTLP Trace"| JAEGER["Jaeger UI (16686)"]
 ```
 
 ---
@@ -78,3 +80,4 @@ flowchart LR
 3. **Authoritative Server-Side Pricing**: Nominal transaksi (`Price`, `SubTotal`, `TaxTotal` PPN 11%, `GrandTotal`) selalu dihitung ulang di `transaction-service` berdasarkan harga master dari `product-service`, bukan mempercayai harga dari payload frontend.
 4. **Resilient Rate Limiting**: `api-gateway` memakai Redis rate limiter untuk skala terdistribusi dan otomatis beralih (*graceful fallback*) ke in-memory rate limiter jika Redis tidak dapat dijangkau.
 5. **Clean Architecture per Service**: Struktur kode seragam di seluruh backend (`controller` → `usecase` → `repository` → `model`) dengan perakitan dependensi di `app/container.go`.
+6. **Distributed Tracing Terintegrasi**: Seluruh 7 service Go menggunakan modul bersama [`backend/pkg/observability`](file:///home/aliube/Workspace/BWA/Gemini/Go/Warehouse-Golang-VueJs-2025/backend/pkg/observability/tracing.go) untuk mengekspor trace OpenTelemetry (OTLP HTTP ke Jaeger dengan propagasi W3C `traceparent` dan header respons `X-Trace-ID`).
