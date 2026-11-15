@@ -1,4 +1,4 @@
-.PHONY: help setup-env build up down logs ps test-backend vet-backend test-integration-gateway test-integration test-frontend build-frontend dev-frontend test
+.PHONY: help setup-env build up down logs ps test-backend vet-backend test-integration-gateway test-integration load-test test-frontend build-frontend dev-frontend test
 
 SERVICES := api-gateway merchant-service notification-service product-service transaction-service user-service warehouse-service
 
@@ -15,6 +15,7 @@ help:
 	@echo "  make vet-backend     Run go vet across all 7 Go microservices"
 	@echo "  make test-integration-gateway  Run API Gateway HTTP integration tests (no Docker needed)"
 	@echo "  make test-integration          Run E2E integration tests against running Docker stack"
+	@echo "  make load-test                 Run k6 load test against API Gateway"
 	@echo "  make dev-frontend    Run Vue 3 Vite dev server"
 	@echo "  make build-frontend  Build Vue 3 production bundle"
 	@echo "  make test            Run all backend tests/vet and frontend production build"
@@ -64,6 +65,9 @@ test-integration-gateway:
 
 test-integration:
 	cd backend/tests/integration && go test -tags=integration -v ./...
+
+load-test:
+	k6 run backend/tests/load/smoke_and_pos.js
 
 test-frontend:
 	cd frontend && npm test

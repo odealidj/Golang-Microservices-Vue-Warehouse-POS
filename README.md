@@ -96,6 +96,7 @@ flowchart LR
 │   ├── transaction-service/
 │   ├── notification-service/
 │   ├── tests/integration/      # E2E integration test lintas service (build tag: integration)
+│   ├── tests/load/             # Skrip load testing k6
 │   └── docker-compose.yml
 ├── frontend/                   # Vue 3 + Vite + Pinia + Tailwind CSS + QuaggaJS
 ├── docs/
@@ -175,3 +176,9 @@ Integration test dipisahkan menggunakan build tag `//go:build integration` agar 
   make test-integration
   ```
   Opsional: atur `API_GATEWAY_URL` (default `http://localhost:8080`) atau `MIDTRANS_SERVER_KEY` untuk ikut memverifikasi signature callback Midtrans.
+
+### Load Testing (k6)
+Menjalankan smoke & load test terhadap API Gateway (pastikan Docker stack sudah aktif via `make up` dan `k6` terpasang):
+```bash
+make load-test
+```
