@@ -1,25 +1,24 @@
-run:
-  timeout: 5m
+version: "2"
 
 linters:
   enable:
-    - errcheck
-    - govet
-    - ineffassign
-    - staticcheck
-    - unused
-    - misspell
     - bodyclose
-
-linters-settings:
-  errcheck:
-    check-type-assertions: false
-    check-blank: false
-  misspell:
-    ignore-words:
-      - notificaiton
+    - misspell
+  settings:
+    errcheck:
+      check-type-assertions: false
+      check-blank: false
+    misspell:
+      ignore-rules:
+        - notificaiton
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
 
 issues:
-  exclude-use-default: true
   max-issues-per-linter: 0
   max-same-issues: 0

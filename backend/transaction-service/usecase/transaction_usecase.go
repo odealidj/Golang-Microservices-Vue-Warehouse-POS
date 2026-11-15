@@ -105,10 +105,7 @@ func (t *transactionUsecase) GetDashboardStats(ctx context.Context, userID uint)
 		return 0, 0, 0, err
 	}
 
-	isManager := false
-	if user.RoleName == "Manager" {
-		isManager = true
-	}
+	isManager := user.RoleName == "Manager"
 
 	if !isManager {
 		return 0, 0, 0, fmt.Errorf("user tidak memiliki akses ke dashboard")
@@ -131,10 +128,7 @@ func (t *transactionUsecase) GetDashboardStatsByMerchant(ctx context.Context, us
 		return 0, 0, 0, err
 	}
 
-	isManager := false
-	if user.RoleName == "Manager" {
-		isManager = true
-	}
+	isManager := user.RoleName == "Manager"
 
 	if isManager {
 		return 0, 0, 0, fmt.Errorf("user tidak memiliki akses ke dashboard")
