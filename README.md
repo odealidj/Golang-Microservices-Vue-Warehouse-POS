@@ -170,14 +170,17 @@ Akses aplikasi melalui browser di `http://localhost:3000`.
 
 ## Pengujian & Verifikasi
 
-Menjalankan seluruh unit test Go (`go test` di semua 7 microservice), static check (`go vet`), unit test frontend (`node --test` untuk Pinia store transaksi), dan build produksi frontend:
+Menjalankan seluruh unit test Go (`go test -race`), static check (`go vet`), linter (`golangci-lint`), unit test frontend (`node --test` untuk Pinia store transaksi), dan build produksi frontend:
 ```bash
 make test
 ```
-Atau per bagian:
+Atau per bagian (termasuk vulnerability scan `govulncheck` dan regenerasi mock **GoMock**):
 ```bash
 make test-backend
 make vet-backend
+make lint-backend
+make vulncheck-backend
+make generate-mocks
 make test-integration-gateway
 make test-frontend
 make build-frontend

@@ -25,6 +25,7 @@ Folder ini berisi dokumentasi arsitektur dan teknis sistem yang disusun secara t
 | `feat/metrics-prometheus` | Metrics `/metrics` (`http_requests_total`, `http_request_duration_seconds`), Prometheus (`:9090`), & Grafana opsional (`:3001`) |
 | `feat/distributed-tracing` | Distributed tracing OpenTelemetry (`traceparent`, `X-Trace-ID`) & Jaeger (`:16686`) |
 | `feat/load-testing` | Load testing API Gateway dengan k6 (`make load-test`) |
+| `feat/go-quality-and-testing` | `golangci-lint`, `govulncheck`, `go test -race`, & **GoMock** (`mockgen` + `go.uber.org/mock`) |
 
 ---
 

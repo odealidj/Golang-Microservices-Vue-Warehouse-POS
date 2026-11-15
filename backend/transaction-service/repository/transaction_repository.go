@@ -9,6 +9,8 @@ import (
 )
 
 // get data overview dashboard manager/keeper,create transaction, update status transaction
+//go:generate mockgen -source=transaction_repository.go -destination=../mocks/mock_transaction_repository.go -package=mocks
+
 type TransactionRepositoryInterface interface {
 	GetDashboardStats(ctx context.Context) (int64, int64, int64, error)
 	GetDashboardStatsByMerchant(ctx context.Context, merchantID uint) (int64, int64, int64, error)

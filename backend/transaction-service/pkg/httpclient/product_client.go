@@ -14,6 +14,8 @@ import (
 	"github.com/gofiber/fiber/v2/log"
 )
 
+//go:generate mockgen -source=product_client.go -destination=../../mocks/mock_product_client.go -package=mocks
+
 type ProductClientInterface interface {
 	GetProductByID(ctx context.Context, productID uint) (*ProductResponse, error)
 	GetProductByBarcode(ctx context.Context, barcode string) (*ProductResponse, error)

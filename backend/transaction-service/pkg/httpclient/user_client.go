@@ -14,6 +14,8 @@ import (
 	"github.com/gofiber/fiber/v2/log"
 )
 
+//go:generate mockgen -source=user_client.go -destination=../../mocks/mock_user_client.go -package=mocks
+
 type UserClientInterface interface {
 	GetUserByID(ctx context.Context, userID uint) (*UserResponse, error)
 }

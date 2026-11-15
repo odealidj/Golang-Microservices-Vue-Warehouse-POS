@@ -15,6 +15,7 @@ Dokumen ini menjelaskan strategi pengujian berlapis serta arsitektur **Observabi
 | `feat/metrics-prometheus` | Metrics Prometheus + Grafana opsional | `backend/pkg/observability/metrics.go`, `backend/observability/{prometheus.yml,grafana-datasources.yml}` |
 | `feat/distributed-tracing` | Distributed tracing OpenTelemetry + Jaeger | `backend/pkg/observability/tracing.go`, propagasi `c.UserContext()` & `NewTracedHTTPClient` |
 | `feat/load-testing` | Load testing skenario API dengan k6 | `backend/tests/load/smoke_and_pos.js`, target `make load-test` |
+| `feat/go-quality-and-testing` | Quality gate Go (`golangci-lint`, `govulncheck`, `-race`) & GoMock | `.golangci.yml`, `.github/workflows/ci.yml`, `Makefile`, `backend/*/mocks/` |
 
 ---
 
@@ -22,7 +23,8 @@ Dokumen ini menjelaskan strategi pengujian berlapis serta arsitektur **Observabi
 
 | Lapisan Test | Perintah | Dependensi Eksternal | Cakupan Utama |
 |---|---|---|---|
-| **Go Unit Test & Vet** | `make test-backend` / `make vet-backend` | Tidak ada (menggunakan mock/in-memory) | Auth/RBAC middleware, server-side pricing + PPN 11%, sanitasi payload event, pagination, lookup barcode, & `pkg/observability` |
+| **Go Unit Test (`-race`) & GoMock** | `make test-backend` / `make generate-mocks` | Tidak ada (`go.uber.org/mock/gomock`) | Auth/RBAC middleware, server-side pricing + PPN 11%, sanitasi payload event, pagination, lookup barcode (seluruh test usecase memakai mock `mockgen` + detector `-race`) |
+| **Static Check, Lint & Security** | `make vet-backend`, `make lint-backend`, `make vulncheck-backend` | Tidak ada (`golangci-lint`), vuln DB (`govulncheck`) | `go vet`, `golangci-lint` (`.golangci.yml`: `errcheck`, `bodyclose`, `govet`, `ineffassign`, `staticcheck`, `unused`, `misspell`), serta pemindaian CVE dependensi dengan `govulncheck` |
 | **Frontend Unit Test & Build** | `make test-frontend` / `make build-frontend` | Node.js `20+` | Pinia store transaksi (`node --test`) dan validasi bundle produksi Vite |
 | **API Gateway Integration Test** | `make test-integration-gateway` | Tidak ada (`httptest.Server`) | `GET /health`, verifikasi JWT, sanitasi header internal (`X-User-*`, `X-Gateway`, `X-Internal-Request`), forwarding webhook Midtrans, serta `/metrics` atau `Traceparent`/`X-Trace-ID` (sesuai branch) |
 | **E2E Multi-Service Integration** | `make test-integration` | Docker stack (`make up`) | Alur Auth → Produk & Gudang → Distribusi ke Merchant (RabbitMQ) → Webhook Midtrans |

@@ -32,6 +32,7 @@ func TestJWTAuthMiddleware_RejectsSpoofedInternalHeaders(t *testing.T) {
 	if err != nil {
 		t.Fatalf("app.Test failed: %v", err)
 	}
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != fiber.StatusUnauthorized {
 		t.Fatalf("expected 401 Unauthorized for spoofed internal headers without JWT, got %d", resp.StatusCode)
 	}
@@ -63,6 +64,7 @@ func TestJWTAuthMiddleware_ValidTokenSetsContext(t *testing.T) {
 	if err != nil {
 		t.Fatalf("app.Test failed: %v", err)
 	}
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != fiber.StatusOK {
 		t.Fatalf("expected 200 OK, got %d", resp.StatusCode)
 	}
@@ -90,6 +92,7 @@ func TestJWTAuthMiddleware_PublicRoutesAllowed(t *testing.T) {
 		if err != nil {
 			t.Fatalf("app.Test(%s %s) failed: %v", tc.method, tc.path, err)
 		}
+		_ = resp.Body.Close()
 		if resp.StatusCode != fiber.StatusOK {
 			t.Fatalf("expected 200 OK for %s %s, got %d", tc.method, tc.path, resp.StatusCode)
 		}
@@ -113,6 +116,7 @@ func TestRoleAuthMiddleware_StringRoles(t *testing.T) {
 	if err != nil {
 		t.Fatalf("app.Test failed: %v", err)
 	}
+	defer func() { _ = respOK.Body.Close() }()
 	if respOK.StatusCode != fiber.StatusOK {
 		t.Fatalf("expected 200 OK, got %d", respOK.StatusCode)
 	}
@@ -121,6 +125,7 @@ func TestRoleAuthMiddleware_StringRoles(t *testing.T) {
 	if err != nil {
 		t.Fatalf("app.Test failed: %v", err)
 	}
+	defer func() { _ = respForbidden.Body.Close() }()
 	if respForbidden.StatusCode != fiber.StatusForbidden {
 		t.Fatalf("expected 403 Forbidden, got %d", respForbidden.StatusCode)
 	}

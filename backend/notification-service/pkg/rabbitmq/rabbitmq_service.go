@@ -73,21 +73,27 @@ func (r *rabbitMQService) ConsumeEmail(ctx context.Context, emailService email.E
 				// Validasi pesan tidak kosong
 				if len(msg.Body) == 0 {
 					log.Warnf("[RabbitMQService] ConsumeEmail - Empty message received")
-					msg.Nack(false, false)
+					if err := msg.Nack(false, false); err != nil {
+						log.Errorf("[RabbitMQService] ConsumeEmail - Nack failed: %v", err)
+					}
 					continue
 				}
 
 				var emailPayload email.EmailPayload
 				if err := json.Unmarshal(msg.Body, &emailPayload); err != nil {
 					log.Errorf("[RabbitMQService] ConsumeEmail - 2: JSON unmarshal error: %v, Raw message: %s", err, string(msg.Body))
-					msg.Nack(false, false)
+					if nackErr := msg.Nack(false, false); nackErr != nil {
+						log.Errorf("[RabbitMQService] ConsumeEmail - Nack failed: %v", nackErr)
+					}
 					continue
 				}
 
 				// Validasi payload
 				if emailPayload.Email == "" {
 					log.Errorf("[RabbitMQService] ConsumeEmail - Invalid payload: email is empty")
-					msg.Nack(false, false)
+					if err := msg.Nack(false, false); err != nil {
+						log.Errorf("[RabbitMQService] ConsumeEmail - Nack failed: %v", err)
+					}
 					continue
 				}
 
@@ -98,16 +104,22 @@ func (r *rabbitMQService) ConsumeEmail(ctx context.Context, emailService email.E
 					err = emailService.SendWelcomeEmail(ctx, emailPayload)
 				default:
 					log.Errorf("[RabbitMQService] ConsumeEmail - 3: Unknown email type: %s", emailPayload.Type)
-					msg.Nack(false, false)
+					if nackErr := msg.Nack(false, false); nackErr != nil {
+						log.Errorf("[RabbitMQService] ConsumeEmail - Nack failed: %v", nackErr)
+					}
 					continue
 				}
 
 				if err != nil {
 					log.Errorf("[RabbitMQService] ConsumeEmail - 4: %v", err)
-					msg.Nack(false, true) // requeue
+					if nackErr := msg.Nack(false, true); nackErr != nil { // requeue
+						log.Errorf("[RabbitMQService] ConsumeEmail - Nack failed: %v", nackErr)
+					}
 				} else {
 					log.Infof("[RabbitMQService] ConsumeEmail - 5: Email sent successfully to %s", emailPayload.Email)
-					msg.Ack(false)
+					if ackErr := msg.Ack(false); ackErr != nil {
+						log.Errorf("[RabbitMQService] ConsumeEmail - Ack failed: %v", ackErr)
+					}
 				}
 			}
 		}

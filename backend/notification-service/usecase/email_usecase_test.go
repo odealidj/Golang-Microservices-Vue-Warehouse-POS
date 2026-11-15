@@ -3,37 +3,22 @@ package usecase
 import (
 	"context"
 	"errors"
-	"micro-warehouse/notificaiton-service/controller/request"
-	"micro-warehouse/notificaiton-service/pkg/email"
 	"testing"
+
+	"micro-warehouse/notificaiton-service/controller/request"
+	"micro-warehouse/notificaiton-service/mocks"
+	"micro-warehouse/notificaiton-service/pkg/email"
+
+	"go.uber.org/mock/gomock"
 )
 
-type stubEmailService struct {
-	customTo      string
-	customSubject string
-	customBody    string
-	welcomeCalled bool
-	welcomeInput  email.EmailPayload
-	err           error
-}
-
-func (s *stubEmailService) SendWelcomeEmail(ctx context.Context, payload email.EmailPayload) error {
-	s.welcomeCalled = true
-	s.welcomeInput = payload
-	return s.err
-}
-
-func (s *stubEmailService) SendCustomEmail(ctx context.Context, to, subject, body string) error {
-	s.customTo = to
-	s.customSubject = subject
-	s.customBody = body
-	return s.err
-}
-
 func TestSendEmail_ForwardsFields(t *testing.T) {
-	svc := &stubEmailService{}
-	uc := NewEmailUsecase(svc)
+	ctrl := gomock.NewController(t)
+	svc := mocks.NewMockEmailServiceInterface(ctrl)
 
+	svc.EXPECT().SendCustomEmail(gomock.Any(), "kasir@example.com", "Laporan Harian", "Omzet hari ini tercatat.").Return(nil)
+
+	uc := NewEmailUsecase(svc)
 	err := uc.SendEmail(context.Background(), request.SendEmailRequest{
 		To:      "kasir@example.com",
 		Subject: "Laporan Harian",
@@ -42,32 +27,34 @@ func TestSendEmail_ForwardsFields(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
-	if svc.customTo != "kasir@example.com" || svc.customSubject != "Laporan Harian" || svc.customBody != "Omzet hari ini tercatat." {
-		t.Fatalf("unexpected forwarded email fields: %+v", svc)
-	}
 }
 
 func TestSendWelcomeEmail_BuildsWelcomePayloadAndPropagatesError(t *testing.T) {
-	svc := &stubEmailService{}
-	uc := NewEmailUsecase(svc)
+	ctrl := gomock.NewController(t)
+	svc := mocks.NewMockEmailServiceInterface(ctrl)
 
-	err := uc.SendWelcomeEmail(context.Background(), request.SendWelcomeEmailRequest{
+	svc.EXPECT().SendWelcomeEmail(gomock.Any(), email.EmailPayload{
+		Type:   "welcome",
 		Email:  "keeper@example.com",
 		UserID: 42,
 		Name:   "Andi",
-	})
-	if err != nil {
-		t.Fatalf("expected nil error, got %v", err)
-	}
-	if !svc.welcomeCalled {
-		t.Fatal("expected SendWelcomeEmail to be called")
-	}
-	if svc.welcomeInput.Type != "welcome" || svc.welcomeInput.Email != "keeper@example.com" || svc.welcomeInput.UserID != 42 || svc.welcomeInput.Name != "Andi" {
-		t.Fatalf("unexpected welcome payload: %+v", svc.welcomeInput)
-	}
+	}).Return(nil)
 
 	wantErr := errors.New("smtp unavailable")
-	svc.err = wantErr
+	svc.EXPECT().SendWelcomeEmail(gomock.Any(), email.EmailPayload{
+		Type:  "welcome",
+		Email: "a@b.com",
+	}).Return(wantErr)
+
+	uc := NewEmailUsecase(svc)
+	if err := uc.SendWelcomeEmail(context.Background(), request.SendWelcomeEmailRequest{
+		Email:  "keeper@example.com",
+		UserID: 42,
+		Name:   "Andi",
+	}); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+
 	if err := uc.SendWelcomeEmail(context.Background(), request.SendWelcomeEmailRequest{Email: "a@b.com"}); !errors.Is(err, wantErr) {
 		t.Fatalf("expected %v, got %v", wantErr, err)
 	}

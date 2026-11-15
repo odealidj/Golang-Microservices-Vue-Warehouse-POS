@@ -24,7 +24,10 @@ func ConnectionPostgres(cfg configs.Config) (*Postgres, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&model.Merchant{}, &model.MerchantProduct{})
+	if err := db.AutoMigrate(&model.Merchant{}, &model.MerchantProduct{}); err != nil {
+		log.Errorf("[Postgres] ConnectionPostgres - AutoMigrate: %v", err)
+		return nil, err
+	}
 	sqlDB, err := db.DB()
 	if err != nil {
 		log.Errorf("[Postgres] ConnectionPostgres - 2: %v", err)

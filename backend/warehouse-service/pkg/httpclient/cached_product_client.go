@@ -27,14 +27,6 @@ func (cpc *CachedProductClient) generateCacheKey(prefix string, id uint) string 
 	return fmt.Sprintf("product:%s:%d", prefix, id)
 }
 
-func (cpc *CachedProductClient) generateCacheKeyMultiple(prefix string, ids []uint) string {
-	key := fmt.Sprintf("product:%s", prefix)
-	for _, id := range ids {
-		key += fmt.Sprintf(":%d", id)
-	}
-	return key[:len(key)-1]
-}
-
 func (cpc *CachedProductClient) GetProductByID(ctx context.Context, productID uint) (*ProductResponse, error) {
 	cacheKey := cpc.generateCacheKey("single", productID)
 

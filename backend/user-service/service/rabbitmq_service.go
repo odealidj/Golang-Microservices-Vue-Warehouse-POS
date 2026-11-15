@@ -18,6 +18,8 @@ type EmailPayload struct {
 	Name     string `json:"name"`
 }
 
+//go:generate mockgen -source=rabbitmq_service.go -destination=../mocks/mock_rabbitmq_service.go -package=mocks
+
 type RabbitMQServiceInterface interface {
 	PublishEmail(ctx context.Context, payload EmailPayload) error
 	Close() error

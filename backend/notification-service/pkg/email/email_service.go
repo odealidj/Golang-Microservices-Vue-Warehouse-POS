@@ -11,6 +11,8 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
+//go:generate mockgen -source=email_service.go -destination=../../mocks/mock_email_service.go -package=mocks
+
 type EmailServiceInterface interface {
 	SendWelcomeEmail(ctx context.Context, payload EmailPayload) error
 	SendCustomEmail(ctx context.Context, to, subject, body string) error

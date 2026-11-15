@@ -1,11 +1,14 @@
 module micro-warehouse/notificaiton-service
 
-go 1.24.3
-
-require github.com/spf13/viper v1.20.1
+go 1.26.0
 
 require (
-	github.com/andybalholm/brotli v1.1.0 // indirect
+	github.com/spf13/viper v1.20.1
+	go.uber.org/mock v0.6.0
+)
+
+require (
+	github.com/andybalholm/brotli v1.3.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
@@ -21,8 +24,8 @@ require (
 
 require (
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
-	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
-	github.com/gofiber/fiber/v2 v2.52.9
+	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
+	github.com/gofiber/fiber/v2 v2.52.16
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/rs/zerolog v1.34.0
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
@@ -36,7 +39,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/text v0.44.0 // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

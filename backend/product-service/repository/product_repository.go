@@ -8,6 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
+//go:generate mockgen -source=product_repository.go -destination=../mocks/mock_product_repository.go -package=mocks
+
 type ProductRepositoryInterface interface {
 	CreateProduct(ctx context.Context, product *model.Product) error
 	GetAllProducts(ctx context.Context, page, limit int, search, sortBy, sortOrder string) ([]model.Product, int64, error)
