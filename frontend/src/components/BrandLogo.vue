@@ -1,7 +1,7 @@
 <template>
   <div
     class="inline-flex items-center shrink-0 select-none"
-    :class="size === 'lg' ? 'gap-3' : 'gap-2.5 h-8'"
+    :class="compact ? 'justify-center' : (size === 'lg' ? 'gap-3' : 'gap-2.5 h-8')"
     aria-label="CODINA logo"
   >
     <img
@@ -10,8 +10,12 @@
       alt="CODINA mark"
     >
     <span
-      class="font-extrabold tracking-[0.08em] text-[#292D32] leading-none"
-      :class="size === 'lg' ? 'text-[28px]' : 'text-[22px]'"
+      v-if="!compact"
+      class="font-extrabold tracking-[0.08em] leading-none"
+      :class="[
+        size === 'lg' ? 'text-[28px]' : 'text-[20px]',
+        variant === 'light' ? 'text-white' : 'text-[#292D32]'
+      ]"
     >
       CODINA
     </span>
@@ -23,6 +27,14 @@ defineProps({
   size: {
     type: String,
     default: 'md'
+  },
+  variant: {
+    type: String,
+    default: 'dark'
+  },
+  compact: {
+    type: Boolean,
+    default: false
   }
 })
 </script>
