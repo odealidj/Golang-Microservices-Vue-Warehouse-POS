@@ -1,83 +1,82 @@
 <template>
-    <Layout 
-      pageTitle="Manage Warehouses"
-      breadcrumbText=""
-      breadcrumbLink="">
-      <main class="flex flex-col gap-6 flex-1">
-        <section id="Warehouses" class="flex flex-col gap-6 flex-1 rounded-3xl p-[18px] px-0 bg-white">
-          <div id="Header" class="flex items-center justify-between px-[18px]">
-            <div class="flex flex-col gap-[6px]">
-              <p class="flex items-center gap-[6px]">
-                <img src="/src/assets/images/icons/buildings-2-black.svg" class="size-6 flex shrink-0" alt="icon">
-                <span class="font-semibold text-2xl">{{ totalRecords }} Total Warehouses</span>
-              </p>
-              <p class="font-semibold text-lg text-monday-gray">View and update your Warehouses list here.</p>
-            </div>
-            <router-link to="/warehouses/add" class="btn btn-primary font-semibold">
-              Add New
-              <img src="/src/assets/images/icons/add-square-white.svg" class="flex size-6 shrink-0" alt="icon">
-            </router-link>
+  <Layout pageTitle="Manage Warehouses" breadcrumbText="" breadcrumbLink="">
+    <main class="flex flex-col flex-1">
+      <section id="Warehouses" class="lte-card-primary flex flex-col flex-1">
+        <div id="Header" class="lte-card-header">
+          <div>
+            <h2 class="lte-card-title">
+              <span>All Warehouses</span>
+              <span class="lte-badge bg-blue-50 text-lte-primary border border-blue-200">
+                {{ totalRecords }} Total
+              </span>
+            </h2>
+            <p class="text-xs text-lte-muted mt-0.5">View and update your Warehouses list here.</p>
           </div>
-          <hr class="border-monday-border">
-          <div id="Warehouse-List" class="flex flex-col px-4 gap-5 flex-1">
-            <div class="flex items-center justify-between">
-              <p class="font-semibold text-xl">All Warehouses</p>
-            </div>
-            
-            <!-- Empty State -->
-            <div v-if="warehouses.length === 0" class="flex flex-col flex-1 items-center justify-center rounded-[20px] border-dashed border-2 border-monday-gray gap-6">
-              <img src="/src/assets/images/icons/document-text-grey.svg" class="size-[52px]" alt="icon">
-              <p class="font-semibold text-monday-gray">Oops, it looks like there's no data yet.</p>
-            </div>
-            
-            <!-- Warehouses List -->
-            <div v-else class="flex flex-col gap-5">
-              <template v-for="(warehouse, index) in warehouses" :key="warehouse.id">
-                <div class="card flex items-center justify-between gap-3 border-none">
-                  <div class="flex items-center gap-3 w-[360px] shrink-0">
-                    <div class="flex size-[86px] rounded-2xl bg-monday-background items-center justify-center overflow-hidden">
-                      <img :src="getWarehouseImage(warehouse.photo)" class="size-full object-contain" alt="warehouse">
-                    </div>
-                    <div class="flex flex-col gap-2 flex-1">
-                      <p class="font-semibold text-xl">{{ warehouse.name }}</p>
-                      <p class="flex items-center gap-1 font-medium text-lg text-monday-gray">
-                        <img src="/src/assets/images/icons/call-grey.svg" class="size-6 flex shrink-0" alt="icon">
-                        <span>{{ warehouse.phone }}</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-2 w-full justify-center">
-                    <img src="/src/assets/images/icons/bag-black.svg" class="size-6 flex shrink-0" alt="icon">
-                    <p class="font-semibold text-lg text-nowrap">{{ formatNumber(warehouse.count_product) }} Products</p>
-                  </div>
-                  <div class="flex items-center gap-4">
-                    <router-link 
-                      :to="`/warehouses/${warehouse.id}`" 
-                      class="btn btn-primary-opacity min-w-[130px] font-semibold"
-                    >
-                      Details
-                    </router-link>
-                    <router-link 
-                      :to="`/warehouses/edit/${warehouse.id}`" 
-                      class="btn btn-black min-w-[130px] font-semibold"
-                    >
-                      <img src="/src/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0" alt="icon">
-                      Edit
-                    </router-link>
-                  </div>
-                </div>
-                <hr v-if="index < warehouses.length - 1" class="border-monday-border last:hidden">
-              </template>
-            </div>
+          <router-link to="/warehouses/add" class="lte-btn-primary">
+            + Add New
+          </router-link>
+        </div>
+
+        <div id="Warehouse-List" class="lte-card-body flex-1 flex flex-col">
+          <!-- Empty State -->
+          <div v-if="warehouses.length === 0" class="flex flex-col flex-1 items-center justify-center rounded border border-dashed border-gray-300 gap-3 py-12">
+            <img src="@/assets/images/icons/document-text-grey.svg" class="size-10 opacity-70" alt="empty">
+            <p class="text-sm font-medium text-lte-muted">Oops, it looks like there's no data yet.</p>
           </div>
-        </section>
-      </main>
-    </Layout>
-  </template>
-  
-  <script>
+
+          <!-- Warehouses Data Table -->
+          <div v-else class="lte-table-wrap">
+            <table class="lte-table">
+              <thead>
+                <tr>
+                  <th>Warehouse</th>
+                  <th>Phone</th>
+                  <th>Stocked Products</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="warehouse in warehouses" :key="warehouse.id">
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <img
+                        :src="getWarehouseImage(warehouse.photo)"
+                        class="size-11 rounded border border-lte-border object-contain bg-gray-50 shrink-0"
+                        alt="warehouse"
+                      >
+                      <span class="font-semibold text-lte-text whitespace-nowrap">{{ warehouse.name }}</span>
+                    </div>
+                  </td>
+                  <td class="text-lte-muted whitespace-nowrap">{{ warehouse.phone }}</td>
+                  <td class="whitespace-nowrap">
+                    <span class="lte-badge bg-gray-100 text-lte-text">
+                      {{ formatNumber(warehouse.count_product) }} Products
+                    </span>
+                  </td>
+                  <td class="text-right whitespace-nowrap">
+                    <div class="inline-flex items-center gap-1.5">
+                      <router-link :to="`/warehouses/${warehouse.id}`" class="lte-btn-info text-xs py-1 px-2.5">
+                        Details
+                      </router-link>
+                      <router-link :to="`/warehouses/edit/${warehouse.id}`" class="lte-btn-warning text-xs py-1 px-2.5">
+                        Edit
+                      </router-link>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </Layout>
+</template>
+
+<script>
 import Layout from '@/components/Layout.vue'
 import { getWarehouses } from '@/js/api'
+import buildingsIcon from '@/assets/images/icons/buildings-2-black.svg'
 
 export default {
   name: 'ManageWarehouse',
@@ -104,38 +103,11 @@ export default {
       }
     },
     getWarehouseImage(photo) {
-      // Use photo from API if available, otherwise use fallback
-      if (photo) {
-        return photo
-      }
-      return '/src/assets/images/icons/buildings-2-black.svg'
+      return photo || buildingsIcon
     },
     formatNumber(num) {
-      return new Intl.NumberFormat('en-US').format(num)
+      return new Intl.NumberFormat('en-US').format(num || 0)
     }
   }
 }
 </script>
-  
-  <style scoped>
-
-.monday-blue {
-  @apply text-[#0073EA];
-}
-
-.monday-gray {
-  @apply text-[#676879];
-}
-
-.monday-border {
-  @apply border-[#E6E6E6];
-}
-
-.monday-background {
-  @apply bg-[#F7F7F7];
-}
-
-.transition-300 {
-  @apply transition-all duration-300;
-}
-</style> 
