@@ -4,209 +4,238 @@
     <MerchantSidebar />
 
     <!-- Main Content -->
-    <div id="Content" class="flex flex-col flex-1 p-6 pt-0">
+    <div id="Content" class="flex flex-col flex-1 p-6 pt-0 bg-lte-bg min-w-0">
       <!-- Top Bar -->
-      <MerchantTopBar 
-        title="Merchant Overview" 
-        breadcrumbText="Back to Dashboard"
-        breadcrumbLink="/overview"
+      <MerchantTopBar
+        title="Merchant Overview"
+        breadcrumbText="Back to Transactions"
+        breadcrumbLink="/transactions"
       />
 
       <!-- Main Content -->
-      <main class="flex flex-col gap-6 flex-1">
-        <!-- Quick Access -->
-        <div class="flex justify-between mb-4">
-          <router-link to="/transactions/add-1" class="btn btn-primary font-semibold">
-            Add New Transaction
-            <img src="@/assets/images/icons/add-square-white.svg" class="flex size-6 shrink-0" alt="icon">
+      <main class="flex flex-col gap-5 flex-1">
+        <!-- Quick Access Toolbar -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <router-link to="/transactions/add-1" class="lte-btn-primary">
+            <span>+ Add New Transaction</span>
           </router-link>
-          
-          <button 
-            @click="refreshDashboard" 
-            class="btn btn-primary-opacity font-semibold"
+
+          <button
+            @click="refreshDashboard"
+            class="lte-btn-default"
             :disabled="dashboardLoading"
           >
-            <img src="@/assets/images/icons/loading.svg" class="size-6 shrink-0" :class="{ 'animate-spin': dashboardLoading }" alt="refresh">
-            Refresh Dashboard
+            <img src="@/assets/images/icons/loading.svg" class="size-4 shrink-0" :class="{ 'animate-spin': dashboardLoading }" alt="refresh">
+            <span>Refresh Dashboard</span>
           </button>
         </div>
-        
-        <!-- Stats Cards -->
-        <section class="grid grid-cols-3 gap-6">
-          <!-- Loading State untuk Dashboard -->
-          <div v-if="dashboardLoading" class="col-span-3 flex items-center justify-center py-12">
-            <div class="text-center">
-              <img src="@/assets/images/icons/loading.svg" class="size-12 animate-spin mx-auto mb-4" alt="loading">
-              <p class="text-monday-gray">Loading dashboard data...</p>
-            </div>
+
+        <!-- AdminLTE Small Boxes (KPI) -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div v-if="dashboardLoading" class="md:col-span-3 lte-card p-10 flex flex-col items-center justify-center">
+            <img src="@/assets/images/icons/loading.svg" class="size-8 animate-spin mb-2" alt="loading">
+            <p class="text-sm text-lte-muted">Loading dashboard data...</p>
           </div>
-          
-          <!-- Error State untuk Dashboard -->
-          <div v-else-if="!currentMerchant" class="col-span-3 flex items-center justify-center py-12">
-            <div class="text-center">
-              <img src="@/assets/images/icons/shop-grey.svg" class="size-12 mx-auto mb-4" alt="no merchant">
-              <p class="text-monday-gray">No merchant data found. Please contact administrator.</p>
-            </div>
+
+          <div v-else-if="!currentMerchant" class="md:col-span-3 lte-card p-10 flex flex-col items-center justify-center text-center">
+            <img src="@/assets/images/icons/shop-grey.svg" class="size-10 mb-2 opacity-70" alt="no merchant">
+            <p class="text-sm text-lte-muted">No merchant data found. Please contact administrator.</p>
           </div>
-          
-          <!-- Dashboard Cards -->
+
           <template v-else>
-            <div id="Total-Revenue" class="flex flex-col rounded-3xl p-[18px] gap-5 bg-white">
-              <div class="flex size-14 rounded-full bg-monday-blue/10 items-center justify-center">
-                <img src="@/assets/images/icons/wallet-blue-fill.svg" class="size-6" alt="icon">
+            <div id="Total-Revenue" class="rounded bg-lte-info text-white shadow-sm overflow-hidden flex flex-col justify-between">
+              <div class="p-4 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-2xl lg:text-[28px] font-bold truncate">Rp {{ formatCurrency(dashboardData.total_revenue) }}</p>
+                  <p class="text-sm text-white/90 mt-1">Total Revenue</p>
+                </div>
+                <img src="@/assets/images/icons/wallet-blue-fill.svg" class="size-12 opacity-30 brightness-0 invert shrink-0" alt="revenue">
               </div>
-              <div class="flex flex-col gap-[6px]">
-                <p class="font-semibold text-[32px]">Rp {{ formatCurrency(dashboardData.total_revenue) }}</p>
-                <p class="font-medium text-lg text-monday-gray">Total Revenue</p>
-              </div>
+              <router-link to="/transactions" class="px-4 py-1.5 bg-black/15 hover:bg-black/25 text-xs font-medium text-white/95 flex items-center justify-center gap-1 transition-colors">
+                <span>View Transactions</span>
+                <span>&rarr;</span>
+              </router-link>
             </div>
-            
-            <div id="Total-Transactions" class="flex flex-col rounded-3xl p-[18px] gap-5 bg-white">
-              <div class="flex size-14 rounded-full bg-monday-blue/10 items-center justify-center">
-                <img src="@/assets/images/icons/document-text-blue-fill.svg" class="size-6" alt="icon">
+
+            <div id="Total-Transactions" class="rounded bg-lte-success text-white shadow-sm overflow-hidden flex flex-col justify-between">
+              <div class="p-4 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-2xl lg:text-[28px] font-bold">{{ formatNumber(dashboardData.total_transactions) }}</p>
+                  <p class="text-sm text-white/90 mt-1">Total Transactions</p>
+                </div>
+                <img src="@/assets/images/icons/document-text-blue-fill.svg" class="size-12 opacity-30 brightness-0 invert shrink-0" alt="transactions">
               </div>
-              <div class="flex flex-col gap-[6px]">
-                <p class="font-semibold text-[32px]">{{ formatNumber(dashboardData.total_transactions) }}</p>
-                <p class="font-medium text-lg text-monday-gray">Total Transactions</p>
-              </div>
+              <router-link to="/transactions" class="px-4 py-1.5 bg-black/15 hover:bg-black/25 text-xs font-medium text-white/95 flex items-center justify-center gap-1 transition-colors">
+                <span>View Transactions</span>
+                <span>&rarr;</span>
+              </router-link>
             </div>
-            
-            <div id="Products-Sold" class="flex flex-col rounded-3xl p-[18px] gap-5 bg-white">
-              <div class="flex size-14 rounded-full bg-monday-blue/10 items-center justify-center">
-                <img src="@/assets/images/icons/bag-blue-fill.svg" class="size-6" alt="icon">
+
+            <div id="Products-Sold" class="rounded bg-lte-warning text-gray-900 shadow-sm overflow-hidden flex flex-col justify-between">
+              <div class="p-4 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-2xl lg:text-[28px] font-bold">{{ formatNumber(dashboardData.products_sold) }}</p>
+                  <p class="text-sm text-gray-900/80 mt-1">Products Sold</p>
+                </div>
+                <img src="@/assets/images/icons/bag-blue-fill.svg" class="size-12 opacity-25 brightness-0 shrink-0" alt="products">
               </div>
-              <div class="flex flex-col gap-[6px]">
-                <p class="font-semibold text-[32px]">{{ formatNumber(dashboardData.products_sold) }}</p>
-                <p class="font-medium text-lg text-monday-gray">Products Sold</p>
-              </div>
+              <router-link to="/my-merchants" class="px-4 py-1.5 bg-black/10 hover:bg-black/15 text-xs font-medium text-gray-900 flex items-center justify-center gap-1 transition-colors">
+                <span>My Merchants</span>
+                <span>&rarr;</span>
+              </router-link>
             </div>
           </template>
         </section>
 
-        <!-- Latest Transactions -->
-        <section id="Latest-Transaction" class="flex flex-col gap-5 flex-1 rounded-3xl p-[18px] bg-white">
-          <div class="flex items-center justify-between">
-            <h2 class="font-bold text-xl">Latest Transaction</h2>
-            <div v-if="loading" class="flex items-center gap-2">
-              <img src="@/assets/images/icons/loading.svg" class="size-5 animate-spin" alt="loading">
-              <span class="text-sm text-monday-gray">Loading...</span>
+        <!-- Latest Transactions Card -->
+        <section id="Latest-Transaction" class="lte-card-primary flex-1">
+          <div class="lte-card-header">
+            <h2 class="lte-card-title">Latest Transaction</h2>
+            <div v-if="loading" class="flex items-center gap-2 text-xs text-lte-muted">
+              <img src="@/assets/images/icons/loading.svg" class="size-4 animate-spin" alt="loading">
+              <span>Loading...</span>
             </div>
           </div>
-          
-          <!-- Loading State -->
-          <div v-if="loading && transactions.length === 0" class="flex flex-col items-center justify-center py-12">
-            <img src="@/assets/images/icons/loading.svg" class="size-12 animate-spin mb-4" alt="loading">
-            <p class="text-monday-gray">Loading transactions...</p>
-          </div>
 
-          <!-- Transaction Cards -->
-          <div v-else-if="transactions.length > 0" class="flex flex-col gap-5">
-            <div 
-              v-for="(transaction, index) in transactions" 
-              :key="transaction.id"
-              class="card-merchant flex flex-col rounded-2xl border border-monday-border"
-            >
-              <div class="flex items-center justify-between p-4 gap-3 pb-5">
-                <div class="flex size-[86px] rounded-2xl bg-monday-background items-center justify-center overflow-hidden">
-                  <img src="@/assets/images/icons/user-thin-grey.svg" class="flex size-[42px] shrink-0" alt="icon">
-                </div>
-                <div class="flex flex-col gap-2 flex-1">
-                  <p class="font-semibold text-xl">{{ transaction.name }}</p>
-                  <p class="flex items-center gap-1 font-medium text-lg text-monday-gray">
-                    <img src="@/assets/images/icons/call-grey.svg" class="size-6 flex shrink-0" alt="icon">
-                    <span>{{ transaction.phone }}</span>
-                  </p>
-                </div>
-                <div class="flex items-center gap-[6px]">
-                  <img src="@/assets/images/icons/shop-black.svg" class="size-6 flex shrink-0" alt="icon">
-                  <p class="font-semibold text-lg text-nowrap">{{ transaction.merchant_name }}</p>
-                </div>
-              </div>
-              <hr class="border-monday-border">
-              <div class="flex flex-col px-4 gap-5 py-5">
-                <button @click="toggleProductAssigned(index + 1)" class="flex items-center justify-between">
-                  <p class="font-semibold text-lg">Product Assigned ({{ transaction.transaction_products?.length || 0 }})</p>
-                  <img :src="expandedSections.includes(index + 1) ? '/src/assets/images/icons/arrow-circle-down.svg' : '/src/assets/images/icons/arrow-circle-up.svg'" class="size-6 flex shrink-0 transition-300" alt="icon">
-                </button>
-                <div v-show="expandedSections.includes(index + 1)" class="flex flex-col gap-5">
-                  <div v-for="(product, productIndex) in transaction.transaction_products" :key="product.id" class="card flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3 w-full">
-                      <div class="flex size-[86px] rounded-2xl bg-monday-background items-center justify-center overflow-hidden">
-                        <img :src="product.product_photo" class="size-full object-contain" alt="product">
-                      </div>
-                      <div class="flex flex-col gap-2 flex-1">
-                        <p class="font-semibold text-xl line-clamp-1">{{ product.product_name }}</p>
-                        <p class="font-semibold text-xl text-monday-blue">
-                          Rp {{ formatNumber(product.price) }} 
-                          <span class="text-monday-gray">({{ product.quantity }}x)</span>
-                        </p>
-                      </div>
+          <div class="lte-card-body">
+            <div v-if="loading && transactions.length === 0" class="flex flex-col items-center justify-center py-10">
+              <img src="@/assets/images/icons/loading.svg" class="size-8 animate-spin mb-2" alt="loading">
+              <p class="text-sm text-lte-muted">Loading transactions...</p>
+            </div>
+
+            <div v-else-if="transactions.length > 0" class="space-y-4">
+              <div
+                v-for="(transaction, index) in transactions"
+                :key="transaction.id"
+                class="rounded border border-lte-border overflow-hidden"
+              >
+                <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-gray-50 border-b border-lte-border">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="size-10 rounded bg-white border border-lte-border flex items-center justify-center shrink-0">
+                      <img src="@/assets/images/icons/user-thin-grey.svg" class="size-5" alt="customer">
                     </div>
-                    <div class="flex items-center gap-[6px] w-full">
-                      <img :src="getCategoryIcon(product.category?.name)" class="size-6 flex shrink-0" alt="icon" onerror="this.src='/src/assets/images/icons/box-grey.svg'">
-                      <p class="font-semibold text-lg text-nowrap">{{ product.category?.name || 'Uncategorized' }}</p>
+                    <div class="min-w-0">
+                      <p class="font-semibold text-sm text-lte-text truncate">{{ transaction.name }}</p>
+                      <p class="text-xs text-lte-muted">{{ transaction.phone }}</p>
                     </div>
-                    <button @click="showProductDetails(product)" class="btn btn-primary-opacity min-w-[130px] font-semibold">Details</button>
                   </div>
-                  <hr v-if="productIndex < transaction.transaction_products?.length - 1" class="border-monday-border last:hidden">
+                  <div class="flex items-center gap-3">
+                    <span class="lte-badge bg-blue-50 text-lte-primary border border-blue-200">
+                      {{ transaction.merchant_name }}
+                    </span>
+                    <span class="text-sm font-bold text-lte-primary">
+                      Rp {{ formatNumber(transaction.grand_total) }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="px-4 py-2.5 bg-white">
+                  <button
+                    @click="toggleProductAssigned(index + 1)"
+                    type="button"
+                    class="flex items-center justify-between w-full text-xs font-semibold text-lte-muted hover:text-lte-text py-1"
+                  >
+                    <span>Product Assigned ({{ transaction.transaction_products?.length || 0 }})</span>
+                    <svg
+                      class="size-4 transition-transform duration-200"
+                      :class="{ 'rotate-180': expandedSections.includes(index + 1) }"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </button>
+
+                  <div v-show="expandedSections.includes(index + 1)" class="mt-2 lte-table-wrap border-t border-lte-border pt-2">
+                    <table class="lte-table">
+                      <thead>
+                        <tr>
+                          <th>Product</th>
+                          <th>Category</th>
+                          <th>Price &times; Qty</th>
+                          <th class="text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="product in transaction.transaction_products" :key="product.id">
+                          <td>
+                            <div class="flex items-center gap-2.5">
+                              <img
+                                :src="product.product_photo"
+                                class="size-9 rounded border border-lte-border object-contain bg-gray-50 shrink-0"
+                                alt="product"
+                                @error="setDefaultProductPhoto"
+                              >
+                              <span class="font-medium text-lte-text line-clamp-1">{{ product.product_name }}</span>
+                            </div>
+                          </td>
+                          <td class="text-lte-muted whitespace-nowrap">
+                            {{ product.category?.name || 'Uncategorized' }}
+                          </td>
+                          <td class="whitespace-nowrap font-medium text-lte-primary">
+                            Rp {{ formatNumber(product.price) }}
+                            <span class="text-lte-muted">({{ product.quantity }}x)</span>
+                          </td>
+                          <td class="text-right">
+                            <button @click="showProductDetails(product)" class="lte-btn-default text-xs py-1 px-2.5">
+                              Details
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
-              <hr class="border-monday-border">
-              <div class="flex items-center justify-between px-4 py-5">
-                <p class="flex items-center gap-1 font-semibold text-lg text-monday-gray">
-                  <img src="@/assets/images/icons/money-grey.svg" class="size-6 flex shrink-0" alt="icon">
-                  Grandtotal:
-                </p>
-                <p class="font-semibold text-xl text-monday-blue">Rp {{ formatNumber(transaction.grand_total) }}</p>
-              </div>
             </div>
-          </div>
 
-          <!-- Empty State -->
-          <div v-else-if="!loading" class="flex flex-col flex-1 items-center justify-center rounded-[20px] border-dashed border-2 border-monday-gray gap-6 py-12">
-            <img src="@/assets/images/icons/document-text-grey.svg" class="size-[52px]" alt="icon">
-            <p class="font-semibold text-monday-gray">Oops, it looks like there's no transaction data yet.</p>
+            <div v-else-if="!loading" class="flex flex-col items-center justify-center rounded border border-dashed border-gray-300 gap-3 py-12 text-center">
+              <img src="@/assets/images/icons/document-text-grey.svg" class="size-10 opacity-70" alt="empty">
+              <p class="text-sm font-medium text-lte-muted">Oops, it looks like there's no transaction data yet.</p>
+            </div>
           </div>
         </section>
       </main>
     </div>
 
     <!-- Product Details Modal -->
-    <div v-if="showModal" class="modal flex flex-1 items-center justify-center h-full fixed top-0 w-full z-50">
-      <div @click="closeModal" class="backdrop absolute w-full h-full bg-[#292D32B2]"></div>
-      <div class="relative flex flex-col w-[406px] shrink-0 rounded-3xl p-[18px] gap-5 bg-white">
-        <div class="modal-header flex items-center justify-between">
-          <p class="font-semibold text-xl">Product Details</p>
-          <button @click="closeModal" class="flex size-14 rounded-full items-center justify-center bg-monday-gray-background">
-            <img src="@/assets/images/icons/close-circle-black.svg" class="size-6" alt="icon">
-          </button>
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div @click="closeModal" class="absolute inset-0 bg-black/50"></div>
+      <div class="relative bg-white rounded border border-lte-border shadow-xl w-full max-w-md overflow-hidden">
+        <div class="lte-card-header bg-gray-50">
+          <h3 class="lte-card-title">Product Details</h3>
+          <button @click="closeModal" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
         </div>
-        <div class="modal-content flex flex-col rounded-3xl border border-monday-border p-4 gap-5" v-if="selectedProduct">
-          <div class="flex items-center justify-between">
-            <div class="flex flex-col gap-2">
-              <p class="flex items-center gap-[6px] font-semibold text-lg">
-                <img :src="getCategoryIcon(selectedProduct.category?.name)" class="size-6 flex shrink-0" alt="icon" onerror="this.src='/src/assets/images/icons/box-grey.svg'">
+        <div class="p-5 space-y-4" v-if="selectedProduct">
+          <div class="flex items-start justify-between gap-4">
+            <div class="space-y-1">
+              <span class="lte-badge bg-gray-100 text-lte-muted">
                 {{ selectedProduct.category?.name || 'Uncategorized' }}
-              </p>
-              <p class="font-bold text-lg">{{ selectedProduct.product_name }}</p>
-              <p class="font-semibold text-[17px] text-monday-blue">
+              </span>
+              <p class="font-bold text-base text-lte-text">{{ selectedProduct.product_name }}</p>
+              <p class="font-semibold text-sm text-lte-primary">
                 Rp {{ formatNumber(selectedProduct.price) }}
-                <span class="text-monday-gray text-sm">(Qty: {{ selectedProduct.quantity }})</span>
+                <span class="text-lte-muted font-normal">(Qty: {{ selectedProduct.quantity }})</span>
               </p>
             </div>
-            <div class="flex size-[100px] rounded-2xl bg-monday-gray-background items-center justify-center overflow-hidden">
-              <img :src="selectedProduct.product_photo" class="size-full object-contain" alt="product" onerror="this.src='/src/assets/images/icons/gallery-default.svg'">
-            </div>
+            <img
+              :src="selectedProduct.product_photo"
+              class="size-20 rounded border border-lte-border object-contain bg-gray-50 shrink-0"
+              alt="product"
+              @error="setDefaultProductPhoto"
+            >
           </div>
-          <hr class="border-monday-border">
-          <div>
-            <p class="font-medium text-sm text-monday-gray">Product About</p>
-            <p class="font-semibold leading-[160%]">{{ selectedProduct.product_about || 'No description available for this product.' }}</p>
+          <div class="border-t border-lte-border pt-3">
+            <p class="text-xs font-semibold uppercase text-lte-muted mb-1">Product About</p>
+            <p class="text-sm text-lte-text leading-relaxed">{{ selectedProduct.product_about || 'No description available for this product.' }}</p>
           </div>
-          <hr class="border-monday-border">
-          <div class="flex items-center justify-between">
-            <p class="font-medium text-sm text-monday-gray">Subtotal</p>
-            <p class="font-semibold text-lg text-monday-blue">Rp {{ formatNumber(selectedProduct.sub_total) }}</p>
+          <div class="border-t border-lte-border pt-3 flex items-center justify-between">
+            <span class="text-sm text-lte-muted">Subtotal</span>
+            <span class="text-base font-bold text-lte-primary">Rp {{ formatNumber(selectedProduct.sub_total) }}</span>
           </div>
         </div>
       </div>
@@ -219,8 +248,8 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import MerchantSidebar from '@/components/MerchantSidebar.vue'
 import MerchantTopBar from '@/components/MerchantTopBar.vue'
 import { getKeeperDashboardData, getTransactions, getFirstMerchantFromStorage } from '@/js/api'
+import { formatCurrency, formatNumber, galleryDefaultIcon } from '@/js/formatters'
 
-// Reactive data
 const transactions = ref([])
 const dashboardData = ref({
   total_revenue: 0,
@@ -228,7 +257,7 @@ const dashboardData = ref({
   products_sold: 0,
   merchant: null
 })
-const expandedSections = ref([1, 2]) // Default expanded sections
+const expandedSections = ref([1, 2])
 const showModal = ref(false)
 const loading = ref(false)
 const dashboardLoading = ref(false)
@@ -236,28 +265,19 @@ const selectedProduct = ref(null)
 const currentMerchant = ref(null)
 const retryCount = ref(0)
 const maxRetries = 3
-const dashboardError = ref('')
 const refreshInterval = ref(null)
 
-// Methods
 const loadDashboardData = async () => {
   try {
     dashboardLoading.value = true
-    
-    // Ambil merchant data dari localStorage
     const merchant = getFirstMerchantFromStorage()
     if (!merchant) {
-      console.error('No merchant data found')
-      // Redirect ke login jika tidak ada merchant data
       window.location.href = '/'
       return
     }
-    
+
     currentMerchant.value = merchant
-    
-    // Panggil API dashboard keeper dengan merchant_id
     const response = await getKeeperDashboardData(merchant.id)
-    
     if (response.data) {
       dashboardData.value = {
         total_revenue: response.data.total_revenue || 0,
@@ -266,24 +286,16 @@ const loadDashboardData = async () => {
         merchant: response.data.merchant || null
       }
     }
-    
-    console.log('Dashboard data loaded:', dashboardData.value)
-    retryCount.value = 0 // Reset retry count on success
-    
+    retryCount.value = 0
   } catch (error) {
     console.error('Error loading dashboard data:', error)
-    
-    // Retry mechanism
     if (retryCount.value < maxRetries) {
       retryCount.value++
-      console.log(`Retrying... Attempt ${retryCount.value}/${maxRetries}`)
       setTimeout(() => {
         loadDashboardData()
-      }, 1000 * retryCount.value) // Exponential backoff
+      }, 1000 * retryCount.value)
       return
     }
-    
-    // Fallback data jika API tidak tersedia setelah retry
     const merchant = getFirstMerchantFromStorage()
     if (merchant) {
       dashboardData.value = {
@@ -313,18 +325,12 @@ const loadDashboardData = async () => {
 const loadLatestTransactions = async () => {
   try {
     loading.value = true
-    
-    // Jika ada merchant data, filter berdasarkan merchant_id
     let query = '?limit=2'
     if (currentMerchant.value) {
       query += `&merchant_id=${currentMerchant.value.id}`
     }
-    
     const response = await getTransactions(query)
     transactions.value = response.data?.transactions || response.transactions || []
-    
-    console.log('Latest transactions loaded:', transactions.value)
-    
   } catch (error) {
     console.error('Error loading latest transactions:', error)
     transactions.value = []
@@ -352,33 +358,8 @@ const closeModal = () => {
   selectedProduct.value = null
 }
 
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('id-ID').format(amount)
-}
-
-const formatNumber = (number) => {
-  return new Intl.NumberFormat('id-ID').format(number)
-}
-
-const getCategoryIcon = (categoryName) => {
-  if (!categoryName) return '/src/assets/images/icons/box-grey.svg'
-  
-  const categoryIcons = {
-    'cosmetics': '/src/assets/images/icons/Makeup-black.svg',
-    'makeup': '/src/assets/images/icons/Makeup-black.svg',
-    'electronics': '/src/assets/images/icons/smartwatch.png',
-    'fashion': '/src/assets/images/icons/bag-black.svg',
-    'food': '/src/assets/images/icons/milk-black.svg',
-    'beverages': '/src/assets/images/icons/glass-black.svg'
-  }
-  
-  const lowerCategory = categoryName.toLowerCase()
-  return categoryIcons[lowerCategory] || '/src/assets/images/icons/box-grey.svg'
-}
-
-const handleImageError = (event) => {
-  console.error('Image failed to load:', event.target.src)
-  event.target.src = '/src/assets/images/icons/shop-grey.svg'
+const setDefaultProductPhoto = (event) => {
+  event.target.src = galleryDefaultIcon
 }
 
 const refreshDashboard = async () => {
@@ -390,54 +371,20 @@ const refreshDashboard = async () => {
   }
 }
 
-// Lifecycle
 onMounted(async () => {
   await loadDashboardData()
   await loadLatestTransactions()
-  
-  // Auto-refresh dashboard data setiap 5 menit
+
   refreshInterval.value = setInterval(async () => {
     if (!dashboardLoading.value) {
       await loadDashboardData()
     }
-  }, 5 * 60 * 1000) // 5 menit
+  }, 5 * 60 * 1000)
 })
 
 onUnmounted(() => {
-  // Cleanup interval
   if (refreshInterval.value) {
     clearInterval(refreshInterval.value)
   }
 })
 </script>
-
-<style scoped>
-.blue-gradient {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-}
-
-.line-clamp-1 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-  line-clamp: 1;
-}
-
-.transition-300 {
-  transition: all 0.3s ease;
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-</style> 
