@@ -1,192 +1,195 @@
 <template>
   <div id="main-container" class="flex flex-1">
-    <!-- Sidebar -->
     <MerchantSidebar />
 
-    <!-- Main Content -->
-    <div id="Content" class="flex flex-col flex-1 p-6 pt-0">
-      <!-- Top Bar -->
-      <MerchantTopBar 
-        title="My Merchants" 
-        breadcrumbText="Back to Dashboard"
-        breadcrumbLink="/overview"
+    <div id="Content" class="flex flex-col flex-1 p-6 pt-0 bg-lte-bg min-w-0">
+      <MerchantTopBar
+        title="My Merchants"
+        breadcrumbText="Merchant Overview"
+        breadcrumbLink="/merchant-overview"
       />
 
-      <!-- Main Content -->
-      <main class="flex flex-col gap-6 flex-1">
-
+      <main class="flex flex-col gap-5 flex-1">
         <!-- Loading State -->
-        <div v-if="loading" class="flex items-center justify-center py-12">
-          <div class="flex items-center gap-3">
-            <img src="@/assets/images/icons/loading.svg" class="size-6 animate-spin" alt="loading">
-            <span class="font-semibold text-lg">Loading merchants...</span>
-          </div>
+        <div v-if="loading" class="lte-card p-12 flex items-center justify-center gap-3">
+          <img src="@/assets/images/icons/loading.svg" class="size-6 animate-spin" alt="loading">
+          <span class="text-sm font-medium text-lte-muted">Loading merchants...</span>
         </div>
 
-        <!-- Merchant Info -->
-        <section v-else-if="selectedMerchant" id="Merchant-Info" class="flex items-center justify-between rounded-3xl p-[18px] gap-3 bg-white">
-          <div class="flex size-16 rounded-2xl bg-monday-background items-center justify-center overflow-hidden">
-            <img :src="selectedMerchant.photo" class="size-full object-contain" alt="merchant">
+        <!-- Merchant Info Card -->
+        <section v-else-if="selectedMerchant" id="Merchant-Info" class="lte-card-info p-4 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3 min-w-0">
+            <img
+              :src="selectedMerchant.photo || defaultMerchantPhoto"
+              class="size-12 rounded border border-lte-border object-contain bg-gray-50 shrink-0"
+              alt="merchant"
+              @error="setDefaultMerchantPhoto"
+            >
+            <div>
+              <p class="font-semibold text-base text-lte-text">{{ selectedMerchant.name }}</p>
+              <p class="text-xs text-lte-muted">{{ selectedMerchant.phone }}</p>
+            </div>
           </div>
-          <div class="flex flex-col gap-2 flex-1">
-            <p class="font-semibold text-xl">{{ selectedMerchant.name }}</p>
-            <p class="flex items-center gap-1 font-medium text-lg text-monday-gray">
-              <img src="@/assets/images/icons/call-grey.svg" class="size-6 flex shrink-0" alt="icon">
-              <span>{{ selectedMerchant.phone }}</span>
-            </p>
-          </div>
-          <div class="flex flex-col gap-2 flex-1">
-            <p class="flex items-center gap-1 font-medium text-monday-gray">
-              <img src="@/assets/images/icons/user-grey.svg" class="size-4 flex shrink-0" alt="icon">
-              <span>Keeper Name:</span>
-            </p>
-            <p class="font-semibold text-lg">{{ selectedMerchant.keeper_name }} (You)</p>
+
+          <div class="flex items-center gap-4">
+            <div v-if="merchants.length > 1" class="flex items-center gap-2">
+              <label class="text-xs text-lte-muted font-medium">Switch Outlet:</label>
+              <select
+                :value="selectedMerchant.id"
+                @change="selectMerchant(merchants.find(m => m.id === Number($event.target.value)))"
+                class="lte-input w-48"
+              >
+                <option v-for="m in merchants" :key="m.id" :value="m.id">{{ m.name }}</option>
+              </select>
+            </div>
+            <div class="text-left sm:text-right">
+              <p class="text-xs text-lte-muted">Keeper Name</p>
+              <p class="text-sm font-semibold text-lte-text">{{ selectedMerchant.keeper_name }} (You)</p>
+            </div>
           </div>
         </section>
 
         <!-- Merchant Selection -->
-        <section v-else-if="merchants.length > 0" id="Merchant-Selection" class="flex flex-col gap-4 rounded-3xl p-[18px] bg-white">
-          <div class="flex items-center gap-2">
-            <img src="@/assets/images/icons/buildings-2-black.svg" class="size-6" alt="icon">
-            <p class="font-semibold text-xl">Select Merchant</p>
+        <section v-else-if="merchants.length > 0" id="Merchant-Selection" class="lte-card-info">
+          <div class="lte-card-header">
+            <h2 class="lte-card-title">Select Merchant</h2>
           </div>
-          <div class="flex flex-wrap gap-3">
-            <button 
-              v-for="merchant in merchants" 
+          <div class="lte-card-body flex flex-wrap gap-3">
+            <button
+              v-for="merchant in merchants"
               :key="merchant.id"
               @click="selectMerchant(merchant)"
-              class="flex items-center gap-3 px-4 py-3 rounded-2xl border border-monday-border hover:border-monday-blue hover:bg-monday-blue/5 transition-all duration-300"
+              class="flex items-center gap-3 px-4 py-3 rounded border border-lte-border hover:border-lte-primary hover:bg-blue-50/40 transition-colors"
             >
-              <div class="flex size-12 rounded-xl bg-monday-background items-center justify-center overflow-hidden">
-                <img :src="merchant.photo" class="size-full object-contain" alt="merchant">
-              </div>
-              <div class="flex flex-col">
-                <p class="font-semibold text-base">{{ merchant.name }}</p>
-                <p class="text-sm text-monday-gray">{{ merchant.merchant_products?.length || 0 }} Products</p>
+              <img :src="merchant.photo || defaultMerchantPhoto" class="size-10 rounded object-contain bg-gray-50" alt="merchant">
+              <div class="text-left">
+                <p class="font-semibold text-sm text-lte-text">{{ merchant.name }}</p>
+                <p class="text-xs text-lte-muted">{{ merchant.merchant_products?.length || 0 }} Products</p>
               </div>
             </button>
           </div>
         </section>
 
-        <!-- Products Section -->
-        <section v-if="selectedMerchant" id="Products" class="flex flex-col gap-6 flex-1 rounded-3xl p-[18px] px-0 bg-white">
-          <div id="Header" class="flex items-center justify-between px-[18px]">
-            <div class="flex flex-col gap-[6px]">
-              <p class="flex items-center gap-[6px]">
-                <img src="@/assets/images/icons/buildings-2-black.svg" class="size-6 flex shrink-0" alt="icon">
-                <span class="font-semibold text-2xl">{{ merchantProducts?.length || 0 }} Total Products</span>
-              </p>
-              <p class="font-semibold text-lg text-monday-gray">View and update your Product Warehouses list here.</p>
+        <!-- Products Data Table -->
+        <section v-if="selectedMerchant" id="Products" class="lte-card-primary flex flex-col flex-1">
+          <div id="Header" class="lte-card-header">
+            <div>
+              <h2 class="lte-card-title">
+                <span>Outlet Products</span>
+                <span class="lte-badge bg-blue-50 text-lte-primary border border-blue-200">
+                  {{ merchantProducts?.length || 0 }} Total
+                </span>
+              </h2>
+              <p class="text-xs text-lte-muted mt-0.5">View your assigned merchant products and stock levels.</p>
             </div>
-            <button 
-              @click="refreshProducts" 
-              :disabled="loadingProducts"
-              class="btn btn-primary-opacity font-semibold flex items-center gap-2"
-            >
-              <span>{{ loadingProducts ? 'Refreshing...' : 'Refresh' }}</span>
+            <button @click="refreshProducts" :disabled="loadingProducts" class="lte-btn-default">
+              {{ loadingProducts ? 'Refreshing...' : 'Refresh' }}
             </button>
           </div>
-          <hr class="border-monday-border">
-          <div id="Product-List" class="flex flex-col px-4 gap-5 flex-1">
-            <div class="flex items-center justify-between">
-              <p class="font-semibold text-xl">All Products</p>
-            </div>
-            
-            <!-- Loading Products State -->
-            <div v-if="loadingProducts" class="flex items-center justify-center py-12">
-              <div class="flex items-center gap-3">
-                <img src="@/assets/images/icons/loading.svg" class="size-6 animate-spin" alt="loading">
-                <span class="font-semibold text-lg">Loading products...</span>
-              </div>
-            </div>
-            
-            <!-- Product Cards -->
-            <div v-else class="flex flex-col gap-5">
-              <div v-for="(product, index) in merchantProducts" :key="product.id" 
-                   class="card flex items-center justify-between gap-6">
-                <div class="flex items-center gap-3 w-[340px] shrink-0">
-                  <div class="flex size-[86px] rounded-2xl bg-monday-background items-center justify-center overflow-hidden">
-                    <img :src="product.product_photo" class="size-full object-contain" alt="product">
-                  </div>
-                  <div class="flex flex-col gap-2 flex-1">
-                    <p class="font-semibold text-xl w-[242px] truncate">{{ product.product_name }}</p>
-                    <p class="font-semibold text-xl text-monday-blue">
-                      Rp {{ formatPrice(product.product_price) }}
-                    </p>
-                  </div>
-                </div>
-                <div class="flex items-center gap-[6px] w-[187px] shrink-0">
-                  <img src="@/assets/images/icons/box-black.svg" class="size-6 flex shrink-0" alt="icon">
-                  <p class="font-semibold text-lg text-nowrap w-[124px] truncate">{{ product.stock }} Stock</p>
-                </div>
-                <div class="flex items-center gap-[6px] w-[187px] shrink-0">
-                  <img :src="product.product_category_photo" class="size-6 flex shrink-0" alt="icon">
-                  <p class="font-semibold text-lg text-nowrap w-[124px] truncate">{{ product.product_category }}</p>
-                </div>
-                <div class="flex items-center gap-4">
-                  <button @click="showProductDetails(product)" class="btn btn-primary-opacity min-w-[130px] font-semibold">Details</button>
-                </div>
-              </div>
-              <hr v-if="index < merchantProducts.length - 1" class="border-monday-border last:hidden">
+
+          <div id="Product-List" class="lte-card-body flex-1 flex flex-col">
+            <div v-if="loadingProducts" class="flex items-center justify-center py-12 gap-3">
+              <img src="@/assets/images/icons/loading.svg" class="size-6 animate-spin" alt="loading">
+              <span class="text-sm font-medium text-lte-muted">Loading products...</span>
             </div>
 
-            <!-- Empty State -->
-            <div v-if="!loadingProducts && (!merchantProducts || merchantProducts.length === 0)" class="flex flex-col flex-1 items-center justify-center rounded-[20px] border-dashed border-2 border-monday-gray gap-6">
-              <img src="@/assets/images/icons/document-text-grey.svg" class="size-[52px]" alt="icon">
-              <p class="font-semibold text-monday-gray">Oops, it looks like there's no data yet.</p>
+            <div v-else-if="merchantProducts && merchantProducts.length > 0" class="lte-table-wrap">
+              <table class="lte-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="product in merchantProducts" :key="product.id">
+                    <td>
+                      <div class="flex items-center gap-3">
+                        <img
+                          :src="product.product_photo || galleryDefaultIcon"
+                          class="size-10 rounded border border-lte-border object-contain bg-gray-50 shrink-0"
+                          alt="product"
+                          @error="setDefaultProductPhoto"
+                        >
+                        <span class="font-semibold text-lte-text max-w-[240px] truncate">{{ product.product_name }}</span>
+                      </div>
+                    </td>
+                    <td class="text-lte-muted whitespace-nowrap">{{ product.product_category || 'Uncategorized' }}</td>
+                    <td class="font-semibold text-lte-primary whitespace-nowrap">Rp {{ formatPrice(product.product_price) }}</td>
+                    <td>
+                      <span
+                        class="lte-badge"
+                        :class="product.stock < 10 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'"
+                      >
+                        {{ product.stock }} Stock
+                      </span>
+                    </td>
+                    <td class="text-right">
+                      <button @click="showProductDetails(product)" class="lte-btn-info text-xs py-1 px-2.5">
+                        Details
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div v-else class="flex flex-col flex-1 items-center justify-center rounded border border-dashed border-gray-300 gap-3 py-12">
+              <img src="@/assets/images/icons/document-text-grey.svg" class="size-10 opacity-70" alt="empty">
+              <p class="text-sm font-medium text-lte-muted">Oops, it looks like there's no data yet.</p>
             </div>
           </div>
         </section>
 
         <!-- Empty State for No Merchants -->
-        <div v-else-if="showEmptyState" class="flex flex-col flex-1 items-center justify-center rounded-[20px] border-dashed border-2 border-monday-gray gap-6">
-          <img src="@/assets/images/icons/document-text-grey.svg" class="size-[52px]" alt="icon">
-          <p class="font-semibold text-monday-gray">Oops, it looks like there's no merchant assigned to you yet.</p>
+        <div v-else-if="showEmptyState" class="lte-card p-12 flex flex-col items-center justify-center gap-3 text-center">
+          <img src="@/assets/images/icons/document-text-grey.svg" class="size-10 opacity-70" alt="empty">
+          <p class="text-sm font-medium text-lte-muted">Oops, it looks like there's no merchant assigned to you yet.</p>
         </div>
       </main>
     </div>
 
     <!-- Product Details Modal -->
-    <div v-if="showModal" class="modal flex flex-1 items-center justify-center h-full fixed top-0 w-full z-50">
-      <div @click="closeModal" class="backdrop absolute w-full h-full bg-[#292D32B2]"></div>
-      <div class="relative flex flex-col w-[406px] shrink-0 rounded-3xl p-[18px] gap-5 bg-white">
-        <div class="modal-header flex items-center justify-between">
-          <p class="font-semibold text-xl">Product Details</p>
-          <button @click="closeModal" class="flex size-14 rounded-full items-center justify-center bg-monday-gray-background">
-            <img src="@/assets/images/icons/close-circle-black.svg" class="size-6" alt="icon">
-          </button>
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div @click="closeModal" class="absolute inset-0 bg-black/50"></div>
+      <div class="relative bg-white rounded border border-lte-border shadow-xl w-full max-w-md overflow-hidden">
+        <div class="lte-card-header bg-gray-50">
+          <h3 class="lte-card-title">Product Details</h3>
+          <button @click="closeModal" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
         </div>
-        <div class="modal-content flex flex-col rounded-3xl border border-monday-border p-4 gap-5">
-          <div class="flex items-center justify-between">
-            <div class="flex flex-col gap-2">
-              <p class="flex items-center gap-[6px] font-semibold text-lg">
-                <img :src="selectedProduct.product_category_photo" class="size-6 flex shrink-0" alt="icon">
-                {{ selectedProduct.product_category }}
-              </p>
-              <p class="font-bold text-lg">{{ selectedProduct.product_name }}</p>
-              <p class="font-semibold text-[17px] text-monday-blue">Rp {{ formatPrice(selectedProduct.product_price) }}</p>
+        <div class="p-5 space-y-4">
+          <div class="flex items-start justify-between gap-4">
+            <div class="space-y-1">
+              <span class="lte-badge bg-gray-100 text-lte-muted">{{ selectedProduct.product_category }}</span>
+              <p class="font-bold text-base text-lte-text">{{ selectedProduct.product_name }}</p>
+              <p class="font-semibold text-sm text-lte-primary">Rp {{ formatPrice(selectedProduct.product_price) }}</p>
             </div>
-            <div class="flex size-[100px] rounded-2xl bg-monday-background items-center justify-center overflow-hidden">
-              <img :src="selectedProduct.product_photo" class="size-full object-contain" alt="product">
-            </div>
+            <img
+              :src="selectedProduct.product_photo || galleryDefaultIcon"
+              class="size-20 rounded border border-lte-border object-contain bg-gray-50 shrink-0"
+              alt="product"
+              @error="setDefaultProductPhoto"
+            >
           </div>
-          <hr class="border-monday-border">
-          <div>
-            <p class="font-medium text-sm text-monday-gray">Product About</p>
-            <p class="font-semibold leading-[160%]">{{ selectedProduct.product_about }}</p>
+          <div class="border-t border-lte-border pt-3">
+            <p class="text-xs font-semibold uppercase text-lte-muted mb-1">Product About</p>
+            <p class="text-sm text-lte-text leading-relaxed">{{ selectedProduct.product_about || '-' }}</p>
           </div>
-          <div class="flex flex-col gap-2">
+          <div class="border-t border-lte-border pt-3 space-y-1.5 text-sm">
             <div class="flex items-center justify-between">
-              <p class="font-medium text-sm text-monday-gray">Stock</p>
-              <p class="font-semibold">{{ selectedProduct.stock }}</p>
+              <span class="text-lte-muted">Stock</span>
+              <span class="font-semibold text-lte-text">{{ selectedProduct.stock }}</span>
             </div>
             <div class="flex items-center justify-between">
-              <p class="font-medium text-sm text-monday-gray">Warehouse</p>
-              <p class="font-semibold">{{ selectedProduct.warehouse_name }}</p>
+              <span class="text-lte-muted">Warehouse</span>
+              <span class="font-semibold text-lte-text">{{ selectedProduct.warehouse_name }}</span>
             </div>
             <div class="flex items-center justify-between">
-              <p class="font-medium text-sm text-monday-gray">Warehouse Phone</p>
-              <p class="font-semibold">{{ selectedProduct.warehouse_phone }}</p>
+              <span class="text-lte-muted">Warehouse Phone</span>
+              <span class="font-semibold text-lte-text">{{ selectedProduct.warehouse_phone }}</span>
             </div>
           </div>
         </div>
@@ -199,12 +202,13 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { getMerchants, getMerchantProducts } from '@/js/api'
+import { galleryDefaultIcon } from '@/js/formatters'
+import defaultMerchantPhoto from '@/assets/images/thumbnails/merchant-1.png'
 import MerchantSidebar from '@/components/MerchantSidebar.vue'
 import MerchantTopBar from '@/components/MerchantTopBar.vue'
 
 const authStore = useAuthStore()
 
-// Reactive data
 const merchants = ref([])
 const selectedMerchant = ref(null)
 const merchantProducts = ref([])
@@ -214,50 +218,34 @@ const showModal = ref(false)
 const showEmptyState = ref(false)
 const selectedProduct = ref({})
 
-// Fetch merchants data
 const fetchMerchants = async () => {
   try {
     loading.value = true
-    
-    // Cek apakah data merchant sudah ada di localStorage
     const storedMerchantData = authStore.getMerchantData()
-    
+
     if (storedMerchantData && storedMerchantData.length > 0) {
-      // Gunakan data dari localStorage
       merchants.value = storedMerchantData
       showEmptyState.value = false
-      
-      // Auto-select first merchant if available
-      if (merchants.value.length > 0) {
-        selectedMerchant.value = merchants.value[0]
-        // Fetch products for selected merchant
-        await fetchMerchantProducts(selectedMerchant.value.id)
-      }
-      
+      selectedMerchant.value = merchants.value[0]
+      await fetchMerchantProducts(selectedMerchant.value.id)
       loading.value = false
       return
     }
-    
-    // Jika tidak ada data di localStorage, fetch dari API
+
     const currentUser = authStore.currentUser
-    
     if (!currentUser || !currentUser.id) {
-      console.error('User not authenticated or user ID not found')
       showEmptyState.value = true
       return
     }
 
-    // Fetch merchants with keeper_id query parameter
     const response = await getMerchants(`?keeper_id=${currentUser.id}`)
-    
     if (response.data) {
-      merchants.value = Array.isArray(response.data.merchant_products) ? response.data.merchant_products : [response.data.merchant_products]
+      merchants.value = Array.isArray(response.data.merchant_products)
+        ? response.data.merchant_products
+        : [response.data.merchant_products]
       showEmptyState.value = merchants.value.length === 0
-      
-      // Auto-select first merchant if available
       if (merchants.value.length > 0) {
         selectedMerchant.value = merchants.value[0]
-        // Fetch products for selected merchant
         await fetchMerchantProducts(selectedMerchant.value.id)
       }
     } else {
@@ -273,84 +261,57 @@ const fetchMerchants = async () => {
   }
 }
 
-// Fetch merchant products
 const fetchMerchantProducts = async (merchantId) => {
   try {
     loadingProducts.value = true
-    
     const response = await getMerchantProducts(merchantId)
-    
     if (response.data) {
-      merchantProducts.value = Array.isArray(response.data.merchant_products) ? response.data.merchant_products : [response.data.merchant_products]
+      merchantProducts.value = Array.isArray(response.data.merchant_products)
+        ? response.data.merchant_products
+        : [response.data.merchant_products]
     } else {
       merchantProducts.value = []
     }
   } catch (error) {
-    console.error('❌ Error fetching merchant products:', error)
-    console.error('Error details:', {
-      message: error.message,
-      status: error.response?.status,
-      data: error.response?.data
-    })
+    console.error('Error fetching merchant products:', error)
     merchantProducts.value = []
   } finally {
     loadingProducts.value = false
   }
 }
 
-// Select merchant
 const selectMerchant = async (merchant) => {
+  if (!merchant) return
   selectedMerchant.value = merchant
-  // Fetch products for the selected merchant
   await fetchMerchantProducts(merchant.id)
 }
 
-// Refresh products for the current selected merchant
 const refreshProducts = async () => {
   if (selectedMerchant.value) {
     await fetchMerchantProducts(selectedMerchant.value.id)
   }
 }
 
-// Format price to Indonesian Rupiah
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('id-ID').format(price)
-}
+const formatPrice = (price) => new Intl.NumberFormat('id-ID').format(price)
 
-// Show product details modal
 const showProductDetails = (product) => {
   selectedProduct.value = product
   showModal.value = true
 }
 
-// Close modal
 const closeModal = () => {
   showModal.value = false
 }
 
-// Fetch data on component mount
+const setDefaultProductPhoto = (event) => {
+  event.target.src = galleryDefaultIcon
+}
+
+const setDefaultMerchantPhoto = (event) => {
+  event.target.src = defaultMerchantPhoto
+}
+
 onMounted(() => {
   fetchMerchants()
 })
 </script>
-
-<style scoped>
-.blue-gradient {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-}
-
-.btn-primary-opacity {
-  @apply bg-monday-blue/10 text-monday-blue hover:bg-monday-blue/20 transition-all duration-300;
-}
-
-.line-clamp-1 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-}
-
-.transition-300 {
-  transition: all 0.3s ease;
-}
-</style> 

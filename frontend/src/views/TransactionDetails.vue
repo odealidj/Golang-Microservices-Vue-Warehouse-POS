@@ -6,50 +6,11 @@
     <!-- Main Content -->
     <div id="Content" class="flex flex-col flex-1 p-6 pt-0">
       <!-- Top Bar -->
-      <div id="Top-Bar" class="flex items-center w-full gap-6 mt-[30px] mb-6">
-        <div class="flex items-center gap-6 h-[92px] bg-white w-full rounded-3xl p-[18px]">
-          <div class="flex flex-col gap-[6px] w-full">
-            <h1 class="font-bold text-2xl">Transaction Details</h1>
-            <router-link to="/transactions" class="flex items-center gap-[6px] text-monday-gray font-semibold">
-              <img src="@/assets/images/icons/arrow-left-grey.svg" class="size-4 flex shrink-0" alt="icon">
-              Manage Transactions
-            </router-link>
-          </div>
-          <div class="flex items-center flex-nowrap gap-3">
-            <a href="#">
-              <div class="flex size-14 rounded-full bg-monday-gray-background items-center justify-center overflow-hidden">
-                <img src="@/assets/images/icons/search-normal-black.svg" class="size-6" alt="icon">
-              </div>
-            </a>
-            <a href="#">
-              <div class="flex size-14 rounded-full bg-monday-gray-background items-center justify-center overflow-hidden">
-                <img src="@/assets/images/icons/notification-black.svg" class="size-6" alt="icon">
-              </div>
-            </a>
-            <div class="relative w-fit">
-              <div class="flex size-14 rounded-full bg-monday-lime-green items-center justify-center overflow-hidden">
-                <img src="@/assets/images/icons/crown-black-fill.svg" class="size-6" alt="icon">
-              </div>
-              <p class="absolute transform -translate-x-1/2 left-1/2 -bottom-2 rounded-[20px] py-1 px-2 bg-monday-black text-white w-fit font-extrabold text-[8px]">PRO</p>
-            </div>
-          </div>
-        </div>
-        <div class="flex items-center gap-3 h-[92px] bg-white w-fit rounded-3xl p-[18px]">
-          <div class="flex rounded-full overflow-hidden size-14">
-            <img src="@/assets/images/photos/photos-3.png" class="size-full object-cover" alt="photo">
-          </div>
-          <div class="flex flex-col gap-1 min-w-[120px] max-w-[160px] w-fit">
-            <p class="font-semibold">Raratih Aqilla</p>
-            <p class="flex items-center gap-1 font-medium text-monday-gray">
-              <img src="@/assets/images/icons/user-grey.svg" class="size-4" alt="icon"> 
-              Keeper
-            </p>
-          </div>
-          <router-link to="/" class="flex w-6">
-            <img src="@/assets/images/icons/logout.svg" class="flex size-6 shrink-0" alt="icon">
-          </router-link>
-        </div>
-      </div>
+      <MerchantTopBar
+        title="Transaction Details"
+        breadcrumbText="Manage Transactions"
+        breadcrumbLink="/transactions"
+      />
 
       <!-- Main Content -->
       <main class="flex flex-col gap-6 flex-1">
@@ -187,6 +148,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import MerchantSidebar from '@/components/MerchantSidebar.vue'
+import MerchantTopBar from '@/components/MerchantTopBar.vue'
 
 const route = useRoute()
 
