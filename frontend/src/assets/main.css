@@ -4,22 +4,90 @@
 
 @layer components {
     .btn{
-        @apply flex gap-2 items-center justify-center py-4 px-6
+        @apply flex gap-2 items-center justify-center py-2.5 px-4 text-sm
     }
     .btn-primary {
-        @apply bg-monday-blue text-white rounded-full;
+        @apply bg-lte-primary hover:bg-lte-primary-hover text-white rounded;
     }
     .btn-black {
-        @apply bg-monday-black text-white rounded-2xl;
+        @apply bg-lte-sidebar hover:bg-lte-sidebar-hover text-white rounded;
     }
     .btn-red {
-        @apply bg-monday-red text-white rounded-full;
+        @apply bg-lte-danger hover:bg-red-700 text-white rounded;
     }
     .btn-primary-opacity {
-        @apply bg-monday-blue/10 text-monday-blue rounded-2xl ring-0 hover:ring-[1.5px] hover:ring-monday-blue transition-300;
+        @apply bg-blue-50 text-lte-primary border border-blue-200 rounded hover:bg-lte-primary hover:text-white transition-300;
     }
     .btn-red-opacity {
-        @apply bg-monday-red/10 text-monday-red rounded-2xl ring-0 hover:ring-[1.5px] hover:ring-monday-red transition-300;
+        @apply bg-red-50 text-lte-danger border border-red-200 rounded hover:bg-lte-danger hover:text-white transition-300;
+    }
+
+    /* AdminLTE Component Primitives */
+    .lte-card {
+        @apply bg-white rounded border border-lte-border shadow-sm overflow-hidden;
+    }
+    .lte-card-primary {
+        @apply lte-card border-t-[3px] border-t-lte-primary;
+    }
+    .lte-card-info {
+        @apply lte-card border-t-[3px] border-t-lte-info;
+    }
+    .lte-card-success {
+        @apply lte-card border-t-[3px] border-t-lte-success;
+    }
+    .lte-card-header {
+        @apply flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-lte-border bg-white;
+    }
+    .lte-card-title {
+        @apply text-base font-semibold text-lte-text flex items-center gap-2;
+    }
+    .lte-card-body {
+        @apply p-4;
+    }
+    .lte-card-footer {
+        @apply px-4 py-3 bg-gray-50 border-t border-lte-border;
+    }
+    .lte-btn {
+        @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed;
+    }
+    .lte-btn-primary {
+        @apply lte-btn bg-lte-primary text-white hover:bg-lte-primary-hover;
+    }
+    .lte-btn-info {
+        @apply lte-btn bg-lte-info text-white hover:bg-cyan-700;
+    }
+    .lte-btn-success {
+        @apply lte-btn bg-lte-success text-white hover:bg-green-700;
+    }
+    .lte-btn-warning {
+        @apply lte-btn bg-lte-warning text-gray-900 hover:bg-amber-500;
+    }
+    .lte-btn-danger {
+        @apply lte-btn bg-lte-danger text-white hover:bg-red-700;
+    }
+    .lte-btn-default {
+        @apply lte-btn bg-white text-lte-text border border-[#ced4da] hover:bg-gray-100;
+    }
+    .lte-input {
+        @apply w-full px-3 py-1.5 text-sm text-lte-text bg-white border border-[#ced4da] rounded focus:outline-none focus:border-lte-primary transition-colors;
+    }
+    .lte-table-wrap {
+        @apply w-full overflow-x-auto;
+    }
+    .lte-table {
+        @apply w-full text-sm text-left border-collapse;
+    }
+    .lte-table thead tr {
+        @apply bg-gray-50 border-b border-lte-border text-xs uppercase tracking-wider text-lte-muted font-semibold;
+    }
+    .lte-table th, .lte-table td {
+        @apply px-4 py-3 border-b border-lte-border align-middle;
+    }
+    .lte-table tbody tr {
+        @apply hover:bg-gray-50/80 transition-colors;
+    }
+    .lte-badge {
+        @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold;
     }
 }
 
@@ -39,17 +107,14 @@ body{
     flex-direction: column;
     flex-grow: 1;
     min-height: 100vh;
-    height: 100vh;
-    background-color: #F3F5F9;
-    color: #292D32;
+    background-color: #f4f6f9;
+    color: #212529;
     margin: 0;
     padding: 0;
-    overflow: hidden;
 }
 
 html {
-    height: 100%;
-    overflow: hidden;
+    min-height: 100%;
 }
 
 /* Fallback untuk loading spinner */
@@ -94,6 +159,17 @@ html {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+/* Harmonize legacy rounded-3xl cards/forms inside AdminLTE content area */
+#Content .rounded-3xl {
+    border-radius: 0.375rem;
+}
+
+#Content section.rounded-3xl,
+#Content form.rounded-3xl {
+    border: 1px solid #dee2e6;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 /* Fallback untuk error state */

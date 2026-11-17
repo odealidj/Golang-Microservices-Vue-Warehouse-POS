@@ -62,10 +62,9 @@ export default {
 
 <style>
 #app {
-  font-family: 'Lexend Deca', sans-serif;
-  height: 100vh;
+  font-family: 'Lexend Deca', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
-</style> 
+</style>
