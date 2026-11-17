@@ -205,6 +205,7 @@ flowchart LR
 - **Verified Payment Webhooks**: Callback Midtrans memverifikasi `signature_key` menggunakan `SHA512(order_id + status_code + gross_amount + server_key)` dengan perbandingan *constant-time*.
 - **Event-Driven Stock Choreography & Privacy-Safe Messaging**: Pengurangan stok gudang dan outlet ter-decouple via RabbitMQ topic exchange, serta pesan email ke broker tidak menyertakan plaintext password.
 - **Clean Architecture Konsisten**: Setiap service memisahkan `controller` → `usecase` → `repository` → `model` dengan wiring dependensi di `app/container.go`, konfigurasi `viper`, dan entrypoint `cobra`.
+- **AdminLTE-Style Vue 3 Frontend (Tailwind-Native)**: Shell layout terpadu (`AdminLteSidebar` & `AdminLteTopBar`) untuk role `Manager` dan `Keeper`, KPI Small Boxes, serta Data Tables padat data yang dibangun di atas Tailwind CSS tanpa mencampur Bootstrap/jQuery sehingga scanner `QuaggaJS` dan `Midtrans Snap` tetap stabil.
 - **Quality, Security & Observability Lengkap**: Dilengkapi race detector (`go test -race`), **GoMock** (`mockgen`), `golangci-lint`, `govulncheck`, GitHub Actions CI, serta **Prometheus/Grafana opsional**, **OpenTelemetry/Jaeger**, dan **k6 load testing** terintegrasi di `main` ([`docs/05-observability-dan-pengujian.md`](docs/05-observability-dan-pengujian.md)).
 
 ---
@@ -220,6 +221,7 @@ Seluruh fitur di bawah telah digabungkan (**merged**) ke `main`, sementara keemp
 | `feat/distributed-tracing` | Distributed Tracing (Terisolasi) | `backend/pkg/observability/tracing.go` (`InitTracing`, `TracingMiddleware`, `NewTracedHTTPClient`, `X-Trace-ID`), Jaeger UI (`:16686`) |
 | `feat/load-testing` | Load Testing (Terisolasi) | Skrip k6 `backend/tests/load/smoke_and_pos.js` & target `make load-test` |
 | `feat/go-quality-and-testing` | Quality, Security & CI/CD (Terisolasi) | `.golangci.yml`, `govulncheck`, `go test -race`, GoMock (`backend/*/mocks/`), serta CI matrix lengkap ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) |
+| `feat/adminlte-layout` | Redesign UI Frontend Gaya AdminLTE | Shell sidebar/topbar bersama (`AdminLteSidebar`, `AdminLteTopBar`), Login Box, KPI Small Boxes, dan Data Tables berbasis Tailwind CSS + Vue 3 tanpa konflik Bootstrap/jQuery |
 
 ---
 
